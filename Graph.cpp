@@ -17,6 +17,10 @@ Graph::Graph(BWAPI::Game* g) {
 	/*dangerFunctions[BWAPI::UnitTypes::Zerg_Hydralisk] = new ActualDangerFunction(
 		BWAPI::UnitTypes::Zerg_Hydralisk,
 		new MLP(1, 1, 5, 0.1, "ADF_" + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt"));*/
+
+	dangerFunctions[BWAPI::UnitTypes::Zerg_Hydralisk] = new ActualDangerFunction(
+	BWAPI::UnitTypes::Zerg_Hydralisk,
+	new RBF(1, 1, 20, 0.1, 15, "ADF_" + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt"));
 }
 
 Graph::~Graph() {

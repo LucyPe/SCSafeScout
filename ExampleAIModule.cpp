@@ -63,7 +63,7 @@ void ExampleAIModule::onFrame() {
 	pathfinder->drawTerrainData();
 	pathfinder->drawEnemiesAttackRange();
 	pathfinder->showPolygons();
-
+	
 	if (setScout()) {
 		// draw enemies positions
 		Unitset enemies = scout->getUnitsInRadius(scout->getType().sightRange() + 100);
@@ -72,7 +72,7 @@ void ExampleAIModule::onFrame() {
 		if (Broodwar->getKeyState(BWAPI::Key::K_RBUTTON)) {
 			pos = BWAPI::Position(Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x, Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
 			pos = pos.makeValid();
-			Broodwar->sendText("pos %d, %d", pos.x, pos.y);
+			//Broodwar->sendText("pos %d, %d", pos.x, pos.y);
 			pathfinder->findPath(scout->getPosition(), pos, scout);
 		}
 
@@ -80,7 +80,7 @@ void ExampleAIModule::onFrame() {
 		if (!pathfinder->existPath()) {
 			//pos = pathfinder->randomPosition();
 			pos = BWAPI::Position(1800, 1200);
-			Broodwar->sendText("pos %d, %d", pos.x, pos.y);
+			//Broodwar->sendText("pos %d, %d", pos.x, pos.y);
 			pathfinder->findPath(scout->getPosition(), pos, scout);
 		}
 		// has path

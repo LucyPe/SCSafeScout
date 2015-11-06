@@ -18,15 +18,13 @@ private:
 
 	vector<double> hidden;
 
-	//int inputs;
-	//int outputs;
+	//centers
 	int neurons;
 	double alfa;
 	double sigma;
 
 	void adjust_weight(vector<double>, Matrix*, vector<double>);
-	void sigmoid(vector<double>*);
-	void sigmoid_d(vector<double>*);
+	double RBFunction(int,vector<double>);
 
 public:
 	// params: input, output, hidden, alpha, sigma, file

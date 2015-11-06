@@ -10,6 +10,7 @@
 
 #include "FunctionApproximator.h"
 #include "MLP.h"
+#include "RBF.h"
 
 class Graph {
 private:
