@@ -1,6 +1,6 @@
 #pragma once
 #include "DangerFunction.h"
-#include "FunctionApproximator.h"
+#include "../FunctionApproximators/FunctionApproximator.h"
 
 class ActualDangerFunction : public DangerFunction {
 

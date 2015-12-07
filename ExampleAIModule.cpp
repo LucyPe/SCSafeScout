@@ -29,6 +29,7 @@ void ExampleAIModule::onStart() {
 
 	//Broodwar->setLocalSpeed(0);
 	//Broodwar->setGUI(false);
+
 	// BWAPI returns std::string when retrieving a string, don't forget to add .c_str() when printing!
 	Broodwar << "The map is " << Broodwar->mapWidth() << " x " << Broodwar->mapHeight()  << std::endl;
 	Broodwar->enableFlag(Flag::UserInput);
@@ -78,8 +79,8 @@ void ExampleAIModule::onFrame() {
 
 		// no path
 		if (!pathfinder->existPath()) {
-			//pos = pathfinder->randomPosition();
-			pos = BWAPI::Position(1800, 1200);
+			pos = pathfinder->randomPosition();
+			//pos = BWAPI::Position(1800, 1200);
 			//Broodwar->sendText("pos %d, %d", pos.x, pos.y);
 			pathfinder->findPath(scout->getPosition(), pos, scout);
 		}

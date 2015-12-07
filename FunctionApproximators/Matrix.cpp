@@ -6,9 +6,31 @@ Matrix::Matrix(int a, int b) {
 	data.resize(w*h);
 }
 
-/* generate radnom values in matrix */
+Matrix::Matrix(vector<double> d) {
+	h = 1;
+	w = d.size();
+	data = d;
+}
+
+
+vector<double> Matrix::getRow(int r) {
+	vector<double> row;
+	for (int i = 0; i < w; i++) {
+		row.push_back(data[r*w + i]);
+	}
+	return row;
+}
+
+void Matrix::setRow(int r, vector<double> input) {
+	if (w == input.size()) {
+		for (int i = 0; i < w; i++) {
+			data[r*w + i] = input[i];
+		}
+	}
+}
+
+/* generate random values in matrix */
 void Matrix::random(int x) {
-	srand(time(NULL));
 	double factor = 1 / sqrt(x);
 	for (int i = 0; i < data.size(); i++) {
 		data[i] = ((((double)rand() / (RAND_MAX)) * 2) - 1) * factor;
@@ -26,11 +48,13 @@ string Matrix::toString() {
 	return sstream.str();
 }
 
-/* generate transparent matrix */
-Matrix* Matrix::transp() {
-	Matrix* tmp = new Matrix(w-1, h);
+/* transpose matrix */
+Matrix* Matrix::transp(bool s) {
+	int newW = w;
+	if (s) newW = w - 1;
+	Matrix* tmp = new Matrix(newW, h);
 	for (int i = 0; i < h; i++) {
-		for (int j = 0; j < w-1; j++) {
+		for (int j = 0; j < newW; j++) {
 			tmp->set(i + j*h, data[j + i*w]);
 		}
 	}
@@ -42,7 +66,8 @@ vector<double> Matrix::multi(vector<double> in) {
 	vector<double> out;
 	out.resize(h);
 	if (w != in.size()) {
-		cout << "Wrong size" << endl;
+		cout << "Wrong size " << w << " " << in.size() << " " << h << endl;
+		return out;
 	}
 
 	for (int i = 0; i < h; i++) {

@@ -4,13 +4,14 @@
 #include "Node.h"
 #include "Utility.h"
 #include "Terrain.h"
-#include "DangerFunction.h"
-#include "ComputedDangerFunction.h"
-#include "ActualDangerFunction.h"
 
-#include "FunctionApproximator.h"
-#include "MLP.h"
-#include "RBF.h"
+#include "DangerFunctions/DangerFunction.h"
+#include "DangerFunctions/ComputedDangerFunction.h"
+#include "DangerFunctions/ActualDangerFunction.h"
+
+#include "FunctionApproximators/FunctionApproximator.h"
+#include "FunctionApproximators/MLP.h"
+#include "FunctionApproximators/RBF.h"
 
 class Graph {
 private:

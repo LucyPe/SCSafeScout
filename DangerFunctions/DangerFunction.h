@@ -1,10 +1,12 @@
 #pragma once
 #include <BWAPI.h>
-#include "MLP.h"
+#include <fstream>
 
 #define PATH_READ "bwapi-data/write/"
 #define PATH_WRITE "bwapi-data/write/"
 #define X_AXE 400
+
+using namespace std;
 
 class DangerFunction {
 
@@ -18,7 +20,7 @@ public:
 	virtual ~DangerFunction();
 
 	BWAPI::UnitType getEnemyType();
-	void setUnitPtr(BWAPI::UnitInterface*);
+	virtual void setUnitPtr(BWAPI::UnitInterface*);
 
 	virtual double compute(double dist) {
 		return 0;
