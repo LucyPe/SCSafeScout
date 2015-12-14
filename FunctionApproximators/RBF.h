@@ -5,6 +5,7 @@ class RBF : public FunctionApproximator {
 private:
 	Matrix* w;
 	Matrix* v;
+	vector<double> radius;
 
 	vector<double> hidden;
 
@@ -12,9 +13,10 @@ private:
 	int neurons;
 	double sigma;
 
-	double RBFunction(int, vector<double>);
-
 	double norm(vector<double>, vector<double>);
+
+	double RBFunction(vector<double>, vector<double>);
+	double triangleRBF(double);
 
 public:
 	// params: input, output, hidden, alpha, sigma, kernels, file
@@ -22,7 +24,6 @@ public:
 	~RBF(void);
 
 	void saveToFile();
-	//void self_organization(vector<double>);
 
 	void init_random(vector<vector<double>>);
 	void init_fixed(double, double);

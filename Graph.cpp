@@ -178,7 +178,7 @@ double Graph::getNodeCost(Node* node, int i, BWAPI::UnitInterface* unit) {
 		
 		Node* n = node->getNeighbour(i);
 		//Broodwar->sendText("update %d", i);
-		BWAPI::Unitset units = Broodwar->getUnitsInRadius(n->getX() * WALK_TILE, n->getY() * WALK_TILE, 400);
+		BWAPI::Unitset units = Broodwar->getUnitsInRadius(n->getX() * WALK_TILE, n->getY() * WALK_TILE, 8 * BUILD_TILE);
 		for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
 			if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
 				BWAPI::Position pos = (*enemy)->getPosition();

@@ -1,15 +1,13 @@
 ﻿#include "RBF.h"
 #include <set>
 
-#define PATH_READ "bwapi-data/write/"
-#define PATH_WRITE "bwapi-data/write/"
 
 RBF::RBF(int i, int o, int h, double a, double s, string f) : FunctionApproximator(i, o, a) {
 	srand(time(NULL)); 
 	
 	fileName = f;
 	ifstream input;
-	input.open(PATH_READ + fileName);
+	input.open(fileName);
 
 	// exists file
 	if (input.is_open()) {
@@ -43,24 +41,11 @@ RBF::~RBF(void) {
 }
 
 double RBF::norm(vector<double> x, vector<double> y) {
-	/*cout << "NORM:" << endl;
-	for (int j = 0; j < x.size(); j++) {
-		cout << x[j] << ", ";
-	}
-	cout << endl;
-
-
-	for (int j = 0; j < y.size(); j++) {
-		cout << y[j] << ", ";
-	}
-	cout << endl;*/
-
 	double res = 0;
 	for (int i = 0; i < x.size(); i++) {
 		res += pow(x[i] - y[i], 2);
 	}
 	res = sqrt(res);
-	/*cout << res << endl;*/
 
 	return res;
 }
@@ -93,7 +78,7 @@ void RBF::init_random(vector<vector<double>> data) {
 	}
 }
 
-void RBF::init_fixed(double radius, double max) {
+void RBF::init_fixed(double max, double radius) {
 	double x = max / radius;
 	for (int i = 0; i < w->h; i++) {
 		for (int j = 0; j < w->w; j++) {
@@ -141,7 +126,7 @@ void RBF::init_self_organization(vector<vector<double>> data, int ep_total) {
 
 void RBF::saveToFile() {
 	ofstream output;
-	output.open(PATH_WRITE + fileName, std::ofstream::out | std::ofstream::trunc);
+	output.open(fileName, std::ofstream::out | std::ofstream::trunc);
 	if (output.is_open()) {
 		output << inputs << " " << outputs << " " << neurons << " " << alpha << " " << sigma << " ";
 		output << w->toString() << " ";
@@ -154,41 +139,36 @@ void RBF::print() {
 	cout << w->toString() << endl;
 }
 
-vector<double> RBF::error(vector<double> d, vector<double> y) {
+vector<double> RBF::error(vector<double> target, vector<double> output) {
 	vector<double> res;
-	for (int i = 0; i < d.size(); i++) {
-		res.push_back(d[i] - y[i]);
+	for (int i = 0; i < target.size(); i++) {
+		res.push_back(target[i] - output[i]);
 	}
 	return res;
 }
 
 void RBF::adjust(vector<double> input, vector<double> output, vector<double> target) {
-	adjust_weight(error(output, target), v, hidden);
+	adjust_weight(error(target, output), v, hidden);
 }
 
-double RBF::RBFunction(int i, vector<double> input) {
+
+double RBF::RBFunction(vector<double> input, vector<double> center) {
+	double x = norm(input, center);
+	return triangleRBF(x);
+}
+
+
+double RBF::triangleRBF(double dist) {
 	//triangle function
-	/*double x = 0;
-	for (int j = 0; j < w.cols; j++) {
-		x += pow(input[j] - w->get(j + i*w->h), 2.0);
-	}
-	if (x > 0) x = sqrt(x);
-	x = x / 400; 
-
-	if (x < 0) {
-		return 0;
-	}
-	return x;*/
-
-	return exp((-pow(norm(input,w->getRow(i)),2))/ pow(sigma, 2));
-
+	if (abs(dist) > sigma) return 0;
+	return dist;
 }
 
 
 vector<double> RBF::compute(vector<double> input) {
 	hidden.resize(0);
 	for (int i = 0; i < neurons; i++) {
-		hidden.push_back(RBFunction(i, input));
+		hidden.push_back(RBFunction(w->getRow(i), input));
 	}
 	return v->multi(hidden);
 	return vector<double>();

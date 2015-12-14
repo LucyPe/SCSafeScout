@@ -8,6 +8,7 @@ using namespace Filter;
 bool analyzed = true;
 bool analysis_just_finished;
 
+int frame = 0;
 SafePathFinder* pathfinder;
 UnitInterface* scout;
 
@@ -65,6 +66,9 @@ void ExampleAIModule::onFrame() {
 	pathfinder->drawEnemiesAttackRange();
 	pathfinder->showPolygons();
 	
+	frame++;
+	if (frame >= 50000) Broodwar->restartGame();
+
 	if (setScout()) {
 		// draw enemies positions
 		Unitset enemies = scout->getUnitsInRadius(scout->getType().sightRange() + 100);
