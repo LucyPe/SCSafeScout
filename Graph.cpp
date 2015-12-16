@@ -15,20 +15,21 @@ Graph::Graph(BWAPI::Game* g) {
 	/* Functions*/
 
 	//dangerFunctions[BWAPI::UnitTypes::Zerg_Drone] = new ComputedDangerFunction(BWAPI::UnitTypes::Zerg_Drone);
-
+	/*
 	dangerFunctions[BWAPI::UnitTypes::Zerg_Mutalisk] = new ActualDangerFunction(
 		BWAPI::UnitTypes::Zerg_Mutalisk,
-		new MLP(1, 1, 5, 0.1, "bwapi-data/write/ADF_" + BWAPI::UnitTypes::Zerg_Mutalisk.toString() + ".txt"));
-	
+		new MLP(1, 1, 5, 0.2, "bwapi-data/write/ADF_" + BWAPI::UnitTypes::Zerg_Mutalisk.toString() + ".txt"));
+	*/
 
 	dangerFunctions[BWAPI::UnitTypes::Zerg_Drone] = new ActualDangerFunction(
 		BWAPI::UnitTypes::Zerg_Drone,
-		new MLP(1, 1, 5, 0.1, "bwapi-data/write/ADF_" + BWAPI::UnitTypes::Zerg_Drone.toString() + ".txt"));
-	
+		new MLP(1, 1, 5, 0.2, "bwapi-data/write/ADF_" + BWAPI::UnitTypes::Zerg_Drone.toString() + ".txt"));
+
 
 	dangerFunctions[BWAPI::UnitTypes::Zerg_Hydralisk] = new ActualDangerFunction(
 		BWAPI::UnitTypes::Zerg_Hydralisk,
-		new MLP(1, 1, 5, 0.1, "bwapi-data/write/ADF_" + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt"));
+		new MLP(1, 1, 5, 0.2, "bwapi-data/write/ADF_" + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt"));
+	
 
 	/*dangerFunctions[BWAPI::UnitTypes::Zerg_Hydralisk] = new ActualDangerFunction(
 	BWAPI::UnitTypes::Zerg_Hydralisk,
@@ -188,7 +189,7 @@ double Graph::getNodeCost(Node* node, int i, BWAPI::UnitInterface* unit) {
 		}
 		//Broodwar->sendText("update %d", (int) danger);
 		if (danger < 0) danger = 0;
-		node->setDangerCost(i, danger);
+		node->setDangerCost(i, danger * 40);
 	}
 	return node->getCost(i);
 }

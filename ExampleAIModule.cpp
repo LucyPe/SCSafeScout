@@ -27,12 +27,12 @@ void ExampleAIModule::onStart() {
 	scout = NULL;
 	pos = pathfinder->randomPosition();
 
-
+	//pos = BWAPI::Position(1800, 1200);
 	//Broodwar->setLocalSpeed(0);
 	//Broodwar->setGUI(false);
 
 	// BWAPI returns std::string when retrieving a string, don't forget to add .c_str() when printing!
-	Broodwar << "The map is " << Broodwar->mapWidth() << " x " << Broodwar->mapHeight()  << std::endl;
+	//Broodwar << "The map is " << Broodwar->mapWidth() << " x " << Broodwar->mapHeight()  << std::endl;
 	Broodwar->enableFlag(Flag::UserInput);
 	//Broodwar->enableFlag(Flag::CompleteMapInformation);
 	// Set the command optimization level so that common commands can be grouped and reduce the bot's APM (Actions Per Minute).
@@ -50,8 +50,8 @@ void ExampleAIModule::onFrame() {
 	//if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) return;
 
 	// Display the game frame rate as text in the upper left area of the screen
-	Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
-	Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
+	//Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
+	//Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
 
 	Broodwar->drawTextScreen(10, 0, "X: %d", Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x);
 	Broodwar->drawTextScreen(10, 20, "Y: %d", Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
@@ -83,22 +83,22 @@ void ExampleAIModule::onFrame() {
 
 		// no path
 		if (!pathfinder->existPath()) {
-			pos = pathfinder->randomPosition();
+			//pos = pathfinder->randomPosition();
 			//pos = BWAPI::Position(1800, 1200);
 			//Broodwar->sendText("pos %d, %d", pos.x, pos.y);
-			pathfinder->findPath(scout->getPosition(), pos, scout);
+			//pathfinder->findPath(scout->getPosition(), pos, scout);
 		}
 		// has path
 		if (pathfinder->existPath()) {
 			if (MOVE && Utility::PositionInRange(pathfinder->nextPosition(), scout->getPosition(), WALK_TILE * 10)) {
-				pathfinder->update(scout);
+				if (frame % 100 == 0) pathfinder->update(scout);
 				scout->move(pathfinder->getNextPosition());
 				// if enemy is near recalculate path
 				if (!enemies.empty())  {
 					pathfinder->findPath(scout->getPosition(), pos, scout);
 				}
 			}
-			if (pathfinder->pathSize() <= 10) Broodwar->restartGame();
+			//if (pathfinder->pathSize() <= 10) Broodwar->restartGame();
 		}
 	}
 }
