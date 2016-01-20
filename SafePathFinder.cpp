@@ -18,8 +18,8 @@ bool SafePathFinder::existPath() {
 	return path.size() != 0;
 }
 
-int SafePathFinder::pathSize() {
-	return path.size();
+BWAPI::Position SafePathFinder::nextPosition() {
+	return path[path.size() - 1];
 }
 
 bool SafePathFinder::findPath(BWAPI::Position start, BWAPI::Position end, BWAPI::UnitInterface* unit) {
@@ -34,19 +34,28 @@ bool SafePathFinder::findPath(BWAPI::Position start, BWAPI::Position end, BWAPI:
 	return path.size() != 0;
 }
 
-BWAPI::Position SafePathFinder::getNextPosition() {
-	BWAPI::Position p = path[path.size() - 1];
-	path.pop_back();
-	return p;
+void SafePathFinder::changePosition(BWAPI::Position position, BWAPI::UnitInterface* unit) {
+	//Broodwar->sendText("pos %d, %d", position.x, position.y);
+	findPath(unit->getPosition(), position, unit);
 }
 
-BWAPI::Position SafePathFinder::nextPosition() {
-	return path[path.size() - 1];
-}
 
-BWAPI::Position SafePathFinder::randomPosition() {
-	BWAPI::Position pos = BWAPI::Position(rand() % (Broodwar->mapWidth() * 32), rand() %  (Broodwar->mapHeight() * 32 - 32));
-	return pos.makeValid();
+void SafePathFinder::moveUnit(BWAPI::UnitInterface* unit, BWAPI::Position position, int frame) {
+	BWAPI::Unitset enemies = unit->getUnitsInRadius(unit->getType().sightRange() + 100);
+	if (existPath()) {
+		if (Utility::PositionInRange(nextPosition(), unit->getPosition(), WALK_TILE * 10)) {
+			if (frame % 100 == 0) update(unit);
+
+			unit->move(nextPosition());
+			path.pop_back();
+
+			// if enemy is near recalculate path
+			if (!enemies.empty())  {
+				findPath(unit->getPosition(), position, unit);
+			}
+		}
+		//if (pathfinder->pathSize() <= 10) Broodwar->restartGame();
+	}
 }
 
 void SafePathFinder::showGrid() {

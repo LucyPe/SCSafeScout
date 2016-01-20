@@ -16,9 +16,6 @@ private:
 
 	std::vector<BWTA::Polygon> unwalkablePolygons;
 	std::vector<BWTA::Polygon> regionsPolygons;
-	std::vector<int> polyCorners;
-	std::vector<std::vector<int>> constant;
-	std::vector<std::vector<int>> multiple;
 
 	void setWalkabilityData();
 	bool readTerrainData();
@@ -28,7 +25,6 @@ public:
 	~Terrain();
 	bool pointInPolygon(int, int, BWTA::Polygon*);
 
-	//void updateWalkabilityData(int, int);
 	int getWalkabilityData(int, int);
 	bool isWalkable(int, int);
 	bool isReachable(int, int, int, int);

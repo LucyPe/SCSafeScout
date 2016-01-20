@@ -21,5 +21,8 @@ namespace Utility {
 
 	double distance(std::pair<int, int>, std::pair<int, int>);
 	double distance(int, int, int, int);
-};
 
+	// map width, map height
+	BWAPI::Position getRandomPosition(int, int);
+	BWAPI::Position getMousePosition(BWAPI::Game*);
+}

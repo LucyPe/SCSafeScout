@@ -21,7 +21,7 @@ Graph::Graph(BWAPI::Game* g) {
 		new MLP(1, 1, 5, 0.2, "bwapi-data/write/ADF_" + BWAPI::UnitTypes::Zerg_Mutalisk.toString() + ".txt"));
 	*/
 
-	dangerFunctions[BWAPI::UnitTypes::Zerg_Drone] = new ActualDangerFunction(
+	/*dangerFunctions[BWAPI::UnitTypes::Zerg_Drone] = new ActualDangerFunction(
 		BWAPI::UnitTypes::Zerg_Drone,
 		new MLP(1, 1, 5, 0.2, "bwapi-data/write/ADF_" + BWAPI::UnitTypes::Zerg_Drone.toString() + ".txt"));
 
@@ -30,7 +30,7 @@ Graph::Graph(BWAPI::Game* g) {
 		BWAPI::UnitTypes::Zerg_Hydralisk,
 		new MLP(1, 1, 5, 0.2, "bwapi-data/write/ADF_" + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt"));
 	
-
+	*/
 	/*dangerFunctions[BWAPI::UnitTypes::Zerg_Hydralisk] = new ActualDangerFunction(
 	BWAPI::UnitTypes::Zerg_Hydralisk,
 	new RBF(1, 1, 20, 0.1, 15, "ADF_" + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt"));*/

@@ -16,7 +16,7 @@ bool GRID = false;
 bool PATH = true;
 bool MOVE = true;
 
-Position pos;
+Position position;
 
 void ExampleAIModule::onStart() {
 	//CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
@@ -25,7 +25,7 @@ void ExampleAIModule::onStart() {
 
 	pathfinder = new SafePathFinder(BroodwarPtr);
 	scout = NULL;
-	pos = pathfinder->randomPosition();
+	position = Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight());
 
 	//pos = BWAPI::Position(1800, 1200);
 	//Broodwar->setLocalSpeed(0);
@@ -70,36 +70,14 @@ void ExampleAIModule::onFrame() {
 	if (frame >= 50000) Broodwar->restartGame();
 
 	if (setScout()) {
-		// draw enemies positions
-		Unitset enemies = scout->getUnitsInRadius(scout->getType().sightRange() + 100);
-
-		// new position
+		// new position - mouse click
 		if (Broodwar->getKeyState(BWAPI::Key::K_RBUTTON)) {
-			pos = BWAPI::Position(Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x, Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
-			pos = pos.makeValid();
-			//Broodwar->sendText("pos %d, %d", pos.x, pos.y);
-			pathfinder->findPath(scout->getPosition(), pos, scout);
+			position = Utility::getMousePosition(BroodwarPtr);
+			pathfinder->changePosition(position, scout);
 		}
 
-		// no path
-		if (!pathfinder->existPath()) {
-			//pos = pathfinder->randomPosition();
-			//pos = BWAPI::Position(1800, 1200);
-			//Broodwar->sendText("pos %d, %d", pos.x, pos.y);
-			//pathfinder->findPath(scout->getPosition(), pos, scout);
-		}
-		// has path
-		if (pathfinder->existPath()) {
-			if (MOVE && Utility::PositionInRange(pathfinder->nextPosition(), scout->getPosition(), WALK_TILE * 10)) {
-				if (frame % 100 == 0) pathfinder->update(scout);
-				scout->move(pathfinder->getNextPosition());
-				// if enemy is near recalculate path
-				if (!enemies.empty())  {
-					pathfinder->findPath(scout->getPosition(), pos, scout);
-				}
-			}
-			//if (pathfinder->pathSize() <= 10) Broodwar->restartGame();
-		}
+		// move
+		if (MOVE) pathfinder->moveUnit(scout, position, frame);
 	}
 }
 
@@ -119,11 +97,10 @@ void ExampleAIModule::onSendText(std::string text) {
 	} else if (text == "m") {
 		MOVE = !MOVE;
 	} else if (text == "r") {
-		pos = pathfinder->randomPosition();
-		Broodwar->sendText("pos %d, %d", pos.x, pos.y);
-		pathfinder->findPath(scout->getPosition(), pos, scout);
+		position = Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight());
+		pathfinder->changePosition(position, scout);		
 	} else if (text == "p") {
-		pathfinder->findPath(scout->getPosition(), pos, scout);
+		pathfinder->changePosition(position, scout);
 	} else if (text == "q") {
 		Broodwar->restartGame();
 	} else if (text == "f") {

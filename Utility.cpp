@@ -50,3 +50,13 @@ double Utility::distance(std::pair<int, int> start, std::pair<int, int> end) {
 double Utility::distance(int sx, int sy, int ex, int ey) {
 	return sqrt(pow(ex - sx, 2.0) + pow(ey - sy, 2.0));
 }
+
+BWAPI::Position Utility::getRandomPosition(int w, int h) {
+	BWAPI::Position pos = BWAPI::Position(rand() % (w * 32), rand() % (h * 32 - 32));
+	return pos.makeValid();
+}
+
+BWAPI::Position Utility::getMousePosition(BWAPI::Game* Broodwar) {
+	BWAPI::Position pos = BWAPI::Position(Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x, Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
+	return pos.makeValid();
+}
