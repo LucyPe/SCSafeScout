@@ -19,7 +19,7 @@ private:
 	double triangleRBF(double);
 
 public:
-	// params: input, output, hidden, alpha, sigma, kernels, file
+	// params: input, output, kernels, alpha, sigma, file
 	RBF(int, int, int, double, double, string);
 	~RBF(void);
 

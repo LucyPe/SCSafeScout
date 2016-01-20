@@ -11,6 +11,7 @@ RBF::RBF(int i, int o, int h, double a, double s, string f) : FunctionApproximat
 
 	// exists file
 	if (input.is_open()) {
+		cout << "loading RBG" << endl;
 		input >> inputs >> outputs >> neurons >> alpha >> sigma;
 		w = new Matrix(neurons, inputs);
 		for (int i = 0; i < w->size(); i++) {
@@ -78,13 +79,14 @@ void RBF::init_random(vector<vector<double>> data) {
 	}
 }
 
-void RBF::init_fixed(double max, double radius) {
-	double x = max / radius;
+void RBF::init_fixed(double start, double radius) {
+	double x = radius;
 	for (int i = 0; i < w->h; i++) {
 		for (int j = 0; j < w->w; j++) {
-			w->set(j, i, x * i);
+			w->set(j, i, start + x * i);
 		}
 	}
+	cout << "init RBF" << endl;
 }
 
 void RBF::init_self_organization(vector<vector<double>> data, int ep_total) {
@@ -171,5 +173,5 @@ vector<double> RBF::compute(vector<double> input) {
 		hidden.push_back(RBFunction(w->getRow(i), input));
 	}
 	return v->multi(hidden);
-	return vector<double>();
+	//return vector<double>();
 }
