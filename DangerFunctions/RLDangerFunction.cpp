@@ -1,5 +1,5 @@
+#pragma once
 #include "RLDangerFunction.h"
-
 
 RLDangerFunction::RLDangerFunction(BWAPI::UnitType unit, FunctionApproximator* fApprox) : DangerFunction(unit) {
 	FA = fApprox;

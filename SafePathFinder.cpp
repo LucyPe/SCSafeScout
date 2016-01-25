@@ -1,3 +1,4 @@
+#pragma once
 #include "SafePathFinder.h"
 
 SafePathFinder::SafePathFinder(BWAPI::Game* g) {

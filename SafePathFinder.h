@@ -1,6 +1,7 @@
 #pragma once
 #include <BWAPI.h>
 #include "Utility.h"
+#pragma once
 #include "Graph.h"
 
 class SafePathFinder {

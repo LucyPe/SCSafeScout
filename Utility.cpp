@@ -1,4 +1,9 @@
+#pragma once
 #include "Utility.h"
+#include "cmath"
+
+#define WALK_TILE 8
+#define BUILD_TILE 32
 
 BWAPI::Position Utility::getWalkTile(BWAPI::Position pos) {
 	return getWalkTile(pos.x, pos.y);

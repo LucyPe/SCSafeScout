@@ -2,16 +2,9 @@
 #include <BWAPI.h>
 #include <BWTA.h>
 #include "Node.h"
-#include "Utility.h"
 #include "Terrain.h"
-
+#include "Utility.h"
 #include "DangerFunctions/DangerFunction.h"
-#include "DangerFunctions/ComputedDangerFunction.h"
-#include "DangerFunctions/ActualDangerFunction.h"
-
-#include "FunctionApproximators/FunctionApproximator.h"
-#include "FunctionApproximators/MLP.h"
-#include "FunctionApproximators/RBF.h"
 
 class Graph {
 private:

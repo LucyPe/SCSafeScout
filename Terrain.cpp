@@ -1,3 +1,4 @@
+#pragma once
 #include "Terrain.h"
 
 Terrain::Terrain(BWAPI::Game* game, int w, int h) {

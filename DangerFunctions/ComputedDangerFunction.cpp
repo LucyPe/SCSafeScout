@@ -1,3 +1,4 @@
+#pragma once
 #include "ComputedDangerFunction.h"
 
 ComputedDangerFunction::ComputedDangerFunction(BWAPI::UnitType enemy) : DangerFunction(enemy) {

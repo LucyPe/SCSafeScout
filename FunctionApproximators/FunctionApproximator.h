@@ -19,10 +19,12 @@ protected:
 	double alpha;
 	string fileName;
 
+	//params: error, weight, layer
 	void adjust_weight(vector<double>, Matrix*, vector<double>);
 
 public:
-	FunctionApproximator(int, int, double);
+	// params: inputs, outputs, alpha, fileName
+	FunctionApproximator(int, int, double, string);
 	~FunctionApproximator();
 
 	// params: input

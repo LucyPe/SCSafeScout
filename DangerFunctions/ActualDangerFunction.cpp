@@ -1,3 +1,4 @@
+#pragma once
 #include "ActualDangerFunction.h"
 
 ActualDangerFunction::ActualDangerFunction(BWAPI::UnitType enemy, FunctionApproximator* fApprox) : DangerFunction(enemy) {

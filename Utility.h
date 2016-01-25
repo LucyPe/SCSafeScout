@@ -1,9 +1,5 @@
 #pragma once
-#include "cmath"
 #include <BWAPI.h>
-
-#define WALK_TILE 8
-#define BUILD_TILE 32
 
 namespace Utility {
 	BWAPI::Position getWalkTile(BWAPI::Position);

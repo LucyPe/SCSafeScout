@@ -1,9 +1,11 @@
+#pragma once
 #include "FunctionApproximator.h"
 
-FunctionApproximator::FunctionApproximator(int i, int o, double a) {
+FunctionApproximator::FunctionApproximator(int i, int o, double a, string file) {
 	inputs = i;
 	outputs = o;
 	alpha = a;
+	fileName = file;
 }
 
 FunctionApproximator::~FunctionApproximator() {}

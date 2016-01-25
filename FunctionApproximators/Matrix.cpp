@@ -1,4 +1,11 @@
+#pragma once
 #include "Matrix.h"
+#include <string>
+#include <sstream> 
+#include <iostream>
+#include <time.h>  
+#include <math.h> 
+#include <iomanip>
 
 Matrix::Matrix(int a, int b) {
 	h = a;
@@ -12,6 +19,34 @@ Matrix::Matrix(vector<double> d) {
 	data = d;
 }
 
+int Matrix::size() {
+	return data.size();
+};
+
+vector<double> Matrix::getData() {
+	return data;
+};
+
+double Matrix::get(int i) {
+	return data[i];
+};
+
+
+double Matrix::get(int x, int y) {
+	return data[y*w + x];
+};
+
+void Matrix::add(int x, int y, double e) {
+	data[y*w + x] += e;
+};
+
+void Matrix::set(int x, int y, double e) {
+	data[y*w + x] = e;
+};
+
+void Matrix::set(int i, double e) {
+	data[i] = e;
+};
 
 vector<double> Matrix::getRow(int r) {
 	vector<double> row;
@@ -33,13 +68,14 @@ void Matrix::setRow(int r, vector<double> input) {
 void Matrix::random(int x) {
 	double factor = 1 / sqrt(x);
 	for (int i = 0; i < data.size(); i++) {
-		data[i] = ((((double)rand() / (RAND_MAX)) * 2) - 1) * factor;
+		data[i] = (((static_cast<double>(rand()) / (RAND_MAX)) * 2) - 1) * factor;
 	}
 }
 
 /* convert to string */
 string Matrix::toString() {
 	std::ostringstream sstream;
+	sstream << std::setprecision(10);
 
 	for (int i = 0; i < data.size(); i++) {
 		sstream << data[i] << " ";

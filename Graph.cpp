@@ -1,4 +1,10 @@
+#pragma once
 #include "Graph.h"
+#include "DangerFunctions/ComputedDangerFunction.h"
+#include "DangerFunctions/ActualDangerFunction.h"
+#include "FunctionApproximators/FunctionApproximator.h"
+#include "FunctionApproximators/MLP.h"
+#include "FunctionApproximators/RBF.h"
 
 Graph::Graph(BWAPI::Game* g) {
 	Broodwar = g;

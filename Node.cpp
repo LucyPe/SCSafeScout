@@ -1,3 +1,4 @@
+#pragma once
 #include "Node.h"
 
 Node::Node(std::pair<int, int> p) {

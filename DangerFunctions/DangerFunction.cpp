@@ -1,4 +1,9 @@
+#pragma once
 #include "DangerFunction.h"
+
+#define PATH_READ "bwapi-data/write/"
+#define PATH_WRITE "bwapi-data/write/"
+#define X_AXE 400
 
 DangerFunction::DangerFunction(BWAPI::UnitType enemy) {
 	enemyType = enemy;

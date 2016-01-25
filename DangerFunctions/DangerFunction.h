@@ -2,10 +2,6 @@
 #include <BWAPI.h>
 #include <fstream>
 
-#define PATH_READ "bwapi-data/write/"
-#define PATH_WRITE "bwapi-data/write/"
-#define X_AXE 400
-
 using namespace std;
 
 class DangerFunction {

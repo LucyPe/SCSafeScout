@@ -1,6 +1,7 @@
 #include "ExampleAIModule.h"
 #include "SafePathFinder.h"
-#include <iostream>
+#include <BWTA.h>
+#include "Utility.h"
 
 using namespace BWAPI;
 using namespace Filter;

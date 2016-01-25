@@ -29,10 +29,15 @@ public:
 	void init_fixed(double, double);
 	void init_self_organization(vector<vector<double>>, int);
 
+	// params: input
 	vector<double> compute(vector<double>);
+	// params: target, output
 	vector<double> error(vector<double>, vector<double>);
+	// params: input, output, target
 	void adjust(vector<double>, vector<double>, vector<double>);
 
+
+	/*Debug functions*/
 	void print();
 };
 

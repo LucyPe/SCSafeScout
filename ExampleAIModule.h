@@ -1,8 +1,6 @@
 #pragma once
 #include <BWAPI.h>
-#include <BWTA.h>
 #include <windows.h>
-#include "Utility.h"
 
 // Remember not to use "Broodwar" in any global class constructor!
 

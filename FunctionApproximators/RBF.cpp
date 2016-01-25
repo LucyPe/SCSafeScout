@@ -1,17 +1,16 @@
-﻿#include "RBF.h"
+﻿#pragma once
+#include "RBF.h"
 #include <set>
 
-
-RBF::RBF(int i, int o, int h, double a, double s, string f) : FunctionApproximator(i, o, a) {
+RBF::RBF(int i, int o, int h, double a, double s, string f) : FunctionApproximator(i, o, a, f) {
 	srand(time(NULL)); 
 	
-	fileName = f;
 	ifstream input;
 	input.open(fileName);
 
 	// exists file
 	if (input.is_open()) {
-		cout << "loading RBG" << endl;
+		cout << "loading RBF" << endl;
 		input >> inputs >> outputs >> neurons >> alpha >> sigma;
 		w = new Matrix(neurons, inputs);
 		for (int i = 0; i < w->size(); i++) {
@@ -44,11 +43,9 @@ RBF::~RBF(void) {
 double RBF::norm(vector<double> x, vector<double> y) {
 	double res = 0;
 	for (int i = 0; i < x.size(); i++) {
-		res += pow(x[i] - y[i], 2);
+		res += (x[i] - y[i]) * (x[i] - y[i]);
 	}
-	res = sqrt(res);
-
-	return res;
+	return sqrt(res);
 }
 
 void RBF::init_random(vector<vector<double>> data) {
@@ -78,12 +75,22 @@ void RBF::init_random(vector<vector<double>> data) {
 		}
 	}
 }
-
+/*
 void RBF::init_fixed(double start, double radius) {
 	double x = radius;
 	for (int i = 0; i < w->h; i++) {
 		for (int j = 0; j < w->w; j++) {
 			w->set(j, i, start + x * i);
+		}
+	}
+	cout << "init RBF" << endl;
+}
+*/
+
+void RBF::init_fixed(double start, double radius) {
+	for (int i = 0; i < w->h; i++) {
+		for (int j = 0; j < w->w; j++) {
+			w->set(j, i, start + radius * i);
 		}
 	}
 	cout << "init RBF" << endl;
@@ -153,24 +160,26 @@ void RBF::adjust(vector<double> input, vector<double> output, vector<double> tar
 	adjust_weight(error(target, output), v, hidden);
 }
 
-
 double RBF::RBFunction(vector<double> input, vector<double> center) {
 	double x = norm(input, center);
 	return triangleRBF(x);
+	//return gaussRBF(x * sigma);
 }
 
+double gaussRBF(double dist) {
+	return std::exp(-(dist * dist));
+}
 
 double RBF::triangleRBF(double dist) {
-	//triangle function
-	if (abs(dist) > sigma) return 0;
-	return dist;
+	if (dist > sigma) return 0;
+	return sigma - dist;
 }
 
 
 vector<double> RBF::compute(vector<double> input) {
-	hidden.resize(0);
+	hidden.clear();
 	for (int i = 0; i < neurons; i++) {
-		hidden.push_back(RBFunction(w->getRow(i), input));
+		hidden.push_back(RBFunction(input, w->getRow(i)));
 	}
 	return v->multi(hidden);
 	//return vector<double>();

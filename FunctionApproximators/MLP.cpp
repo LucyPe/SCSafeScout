@@ -1,9 +1,9 @@
+#pragma once
 #include "MLP.h"
 
-MLP::MLP(int i, int o, int h, double a, string f) : FunctionApproximator(i, o, a) {
+MLP::MLP(int i, int o, int h, double a, string f) : FunctionApproximator(i, o, a, f) {
 	srand(time(NULL)); 
 	
-	fileName = f;
 	ifstream input;
 	input.open(fileName);
 
@@ -24,7 +24,6 @@ MLP::MLP(int i, int o, int h, double a, string f) : FunctionApproximator(i, o, a
 		}
 		input.close(); 
 	}
-
 	// new FA
 	else {
 		neurons = h;
