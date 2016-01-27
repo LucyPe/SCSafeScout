@@ -1,13 +1,10 @@
 #pragma once
+#include "Matrix.h"
 #include <vector>
-
+#include <ctime>
+#include <fstream>
 #include <iostream>
 #include <sstream>
-#include <fstream>
-#include <algorithm> 
-#include <math.h>   
-#include <ctime>
-#include "Matrix.h"
 
 using namespace std;
 

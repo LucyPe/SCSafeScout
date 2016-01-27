@@ -2,12 +2,13 @@
 #include "SafePathFinder.h"
 #include <BWTA.h>
 #include "Utility.h"
+#include "Const.h"
 
 using namespace BWAPI;
-using namespace Filter;
 
+/*
 bool analyzed = true;
-bool analysis_just_finished;
+bool analysis_just_finished;*/
 
 int frame = 0;
 SafePathFinder* pathfinder;
@@ -28,17 +29,17 @@ void ExampleAIModule::onStart() {
 	scout = NULL;
 	position = Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight());
 
-	//pos = BWAPI::Position(1800, 1200);
-	//Broodwar->setLocalSpeed(0);
-	//Broodwar->setGUI(false);
+	if (Const::NO_GUI) {
+		Broodwar->setLocalSpeed(0);
+		Broodwar->setGUI(false);
+	}
 
 	// BWAPI returns std::string when retrieving a string, don't forget to add .c_str() when printing!
 	//Broodwar << "The map is " << Broodwar->mapWidth() << " x " << Broodwar->mapHeight()  << std::endl;
-	Broodwar->enableFlag(Flag::UserInput);
 	//Broodwar->enableFlag(Flag::CompleteMapInformation);
 	// Set the command optimization level so that common commands can be grouped and reduce the bot's APM (Actions Per Minute).
 	Broodwar->setCommandOptimizationLevel(2);
-
+	Broodwar->enableFlag(Flag::UserInput);
 }
 
 void ExampleAIModule::onEnd(bool isWinner) {
@@ -51,8 +52,8 @@ void ExampleAIModule::onFrame() {
 	//if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) return;
 
 	// Display the game frame rate as text in the upper left area of the screen
-	//Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
-	//Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
+	Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
+	Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
 
 	Broodwar->drawTextScreen(10, 0, "X: %d", Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x);
 	Broodwar->drawTextScreen(10, 20, "Y: %d", Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
@@ -63,14 +64,18 @@ void ExampleAIModule::onFrame() {
 	if (GRID) pathfinder->showGrid();
 	if (PATH) pathfinder->showPath();
 
-	pathfinder->drawTerrainData();
-	pathfinder->drawEnemiesAttackRange();
-	pathfinder->showPolygons();
-	
+	if (Const::TERRAIN_DATA) {
+		pathfinder->drawTerrainData();
+		pathfinder->showPolygons();
+	}
+
+	if (Const::ENEMY_RANGE) pathfinder->drawEnemiesAttackRange();
+
 	frame++;
-	if (frame >= 50000) Broodwar->restartGame();
+	if (Const::LEARNING && frame >= 10000) Broodwar->restartGame();
 
 	if (setScout()) {
+
 		// new position - mouse click
 		if (Broodwar->getKeyState(BWAPI::Key::K_RBUTTON)) {
 			position = Utility::getMousePosition(BroodwarPtr);
@@ -85,13 +90,13 @@ void ExampleAIModule::onFrame() {
 void ExampleAIModule::onSendText(std::string text) {
 	// Make sure to use %s and pass the text as a parameter,
 	// otherwise you may run into problems when you use the %(percent) character!
-	if (text == "/analyze") {
+	/*if (text == "/analyze") {
 		if (analyzed == false) {
 			Broodwar << "Analyzing map... this may take a minute" << std::endl;;
 			CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
 		}
-	}
-	else if (text == "g") {
+	}*/
+	if (text == "g") {
 		GRID = !GRID;
 	} else if (text == "s") {
 		PATH = !PATH;
@@ -182,14 +187,13 @@ void ExampleAIModule::onUnitComplete(BWAPI::Unit unit) {
 }
 
 //BWTA
-
+/*
 DWORD WINAPI AnalyzeThread() {
 	BWTA::analyze();
-
 	analyzed = true;
 	analysis_just_finished = true;
 	return 0;
-}
+}*/
 
 //other
 bool ExampleAIModule::ignoreUnit(BWAPI::Unit u) {

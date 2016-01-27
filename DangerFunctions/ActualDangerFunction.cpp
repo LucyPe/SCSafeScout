@@ -1,5 +1,7 @@
 #pragma once
 #include "ActualDangerFunction.h"
+#include "../Const.h"
+#include "../Utility.h"
 
 ActualDangerFunction::ActualDangerFunction(BWAPI::UnitType enemy, FunctionApproximator* fApprox) : DangerFunction(enemy) {
 	FA = fApprox;
@@ -12,7 +14,7 @@ ActualDangerFunction::~ActualDangerFunction() {
 }
 
 vector<double> ActualDangerFunction::createInput(double dist) {
-	return vector<double>(1, dist / 400);
+	return vector<double>(1, dist);
 }
 
 void ActualDangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
@@ -25,12 +27,10 @@ void ActualDangerFunction::learn(double dist) {
 	if (unitPtr != NULL) {
 		double actualHp = (unitPtr->getHitPoints() + unitPtr->getShields());
 		vector<double> input = createInput(dist);
-		testFile.open("bwapi-data/write/gg.txt", std::ofstream::out | std::ofstream::app);
-		if (testFile.is_open()) {
-			testFile << (hp - actualHp) / maxHp << endl;
-			testFile.close();
-		}
-		FA->adjust(input, FA->compute(createInput(dist)), vector<double>(1, (hp - actualHp) / maxHp));
+
+		//Utility::printToFile(Const::PATH_DEBUG, std::to_string((hp - actualHp) / maxHp));
+		
+		FA->adjust(input, FA->compute(input), createInput((hp - actualHp) / maxHp));
 
 		/*testFile.open("bwapi-data/write/gg.txt", std::ofstream::out | std::ofstream::app);
 		if (testFile.is_open()) {
@@ -39,6 +39,9 @@ void ActualDangerFunction::learn(double dist) {
 		}*/
 
 		hp = actualHp;
+	}
+	else {
+		Utility::printToFile(Const::PATH_ERROR, "ActualDangerFunction - no unit pointer");
 	}
 }
 

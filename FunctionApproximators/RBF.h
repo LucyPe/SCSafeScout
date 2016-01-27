@@ -19,8 +19,8 @@ private:
 	double triangleRBF(double);
 
 public:
-	// params: input, output, kernels, alpha, sigma, file
-	RBF(int, int, int, double, double, string);
+	// params: input, output, kernels, alpha, sigma, center_start, cener_radius, file
+	RBF(int, int, int, double, double, double, double, string);
 	~RBF(void);
 
 	void saveToFile();

@@ -1,10 +1,9 @@
 ﻿#pragma once
 #include "RBF.h"
+#include "../Utility.h"
 #include <set>
 
-RBF::RBF(int i, int o, int h, double a, double s, string f) : FunctionApproximator(i, o, a, f) {
-	srand(time(NULL)); 
-	
+RBF::RBF(int i, int o, int h, double a, double s, double start, double radius, string f) : FunctionApproximator(i, o, a, f) {
 	ifstream input;
 	input.open(fileName);
 
@@ -34,6 +33,8 @@ RBF::RBF(int i, int o, int h, double a, double s, string f) : FunctionApproximat
 		v = new Matrix(outputs, neurons);
 
 		v->random(neurons);
+
+		init_fixed(start, radius);
 	}
 }
 
@@ -46,6 +47,17 @@ double RBF::norm(vector<double> x, vector<double> y) {
 		res += (x[i] - y[i]) * (x[i] - y[i]);
 	}
 	return sqrt(res);
+}
+
+void RBF::init_fixed(double start, double radius) {
+	for (int i = 0; i < w->h; i++) {
+		for (int j = 0; j < w->w; j++) {
+			w->set(j, i, start + radius * i);
+		}
+	}
+
+	Utility::printToFile("bwapi-data/write/gg.txt", w->toString());
+	Utility::printToFile("bwapi-data/write/gg.txt", v->toString());
 }
 
 void RBF::init_random(vector<vector<double>> data) {
@@ -87,14 +99,7 @@ void RBF::init_fixed(double start, double radius) {
 }
 */
 
-void RBF::init_fixed(double start, double radius) {
-	for (int i = 0; i < w->h; i++) {
-		for (int j = 0; j < w->w; j++) {
-			w->set(j, i, start + radius * i);
-		}
-	}
-	cout << "init RBF" << endl;
-}
+
 
 void RBF::init_self_organization(vector<vector<double>> data, int ep_total) {
 	init_random(data);

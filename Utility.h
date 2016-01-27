@@ -1,5 +1,7 @@
 #pragma once
 #include <BWAPI.h>
+#include <string>
+#include <fstream>
 
 namespace Utility {
 	BWAPI::Position getWalkTile(BWAPI::Position);
@@ -21,4 +23,8 @@ namespace Utility {
 	// map width, map height
 	BWAPI::Position getRandomPosition(int, int);
 	BWAPI::Position getMousePosition(BWAPI::Game*);
+
+	//file
+	void printToFile(std::string file, std::string line);
+	void printToFile(std::fstream* file, std::string line);
 }

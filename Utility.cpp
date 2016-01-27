@@ -1,16 +1,14 @@
 #pragma once
 #include "Utility.h"
+#include "Const.h"
 #include "cmath"
-
-#define WALK_TILE 8
-#define BUILD_TILE 32
 
 BWAPI::Position Utility::getWalkTile(BWAPI::Position pos) {
 	return getWalkTile(pos.x, pos.y);
 }
 
 BWAPI::Position Utility::getWalkTile(int x, int y) {
-	return BWAPI::Position(x / WALK_TILE, y / WALK_TILE);
+	return BWAPI::Position(x / Const::WALK_TILE, y / Const::WALK_TILE);
 }
 
 bool Utility::PositionInRange(int sx, int sy, int ex, int ey, int range) {
@@ -25,7 +23,7 @@ bool Utility::PositionInRange(BWAPI::Position s, BWAPI::Position e, int range) {
 }
 
 int Utility::PositionToWalkPosition(int x) {
-	return (int)floor(((double)x / WALK_TILE) + 0.5);
+	return (int)floor(((double)x / Const::WALK_TILE) + 0.5);
 }
 
 int Utility::WalkToBuildPosition(int x) {
@@ -33,7 +31,7 @@ int Utility::WalkToBuildPosition(int x) {
 }
 
 int Utility::PositionToBuildPosition(int x) {
-	return (int)floor(((double)x / BUILD_TILE) + 0.5);
+	return (int)floor(((double)x / Const::WALK_TILE) + 0.5);
 }
 
 BWAPI::Position Utility::PositionToWalkTile(BWAPI::Position p) {
@@ -53,7 +51,7 @@ double Utility::distance(std::pair<int, int> start, std::pair<int, int> end) {
 }
 
 double Utility::distance(int sx, int sy, int ex, int ey) {
-	return sqrt(pow(ex - sx, 2.0) + pow(ey - sy, 2.0));
+	return sqrt((ex - sx) * (ex - sx) + (ey - sy) * (ey - sy));
 }
 
 BWAPI::Position Utility::getRandomPosition(int w, int h) {
@@ -64,4 +62,15 @@ BWAPI::Position Utility::getRandomPosition(int w, int h) {
 BWAPI::Position Utility::getMousePosition(BWAPI::Game* Broodwar) {
 	BWAPI::Position pos = BWAPI::Position(Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x, Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
 	return pos.makeValid();
+}
+
+void Utility::printToFile(std::string fileName, std::string line) {
+	std::ofstream file;
+	file.open(fileName, std::ofstream::out | std::ofstream::app);
+	file << line << std::endl;
+	file.close();
+}
+
+void Utility::printToFile(std::fstream* file, std::string line) {
+	(*file) << line << std::endl;
 }

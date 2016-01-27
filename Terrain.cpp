@@ -1,5 +1,6 @@
 #pragma once
 #include "Terrain.h"
+#include "Const.h"
 
 Terrain::Terrain(BWAPI::Game* game, int w, int h) {
 	Broodwar = game;
@@ -39,15 +40,15 @@ bool Terrain::readTerrainData() {
 }
 
 bool Terrain::pointInPolygon(int walk_x, int walk_y, BWTA::Polygon* polygon) {
-	for (int x = walk_x * WALK_TILE; x <= (walk_x * WALK_TILE + WALK_TILE); x += WALK_TILE) {
-		for (int y = walk_y * WALK_TILE; y <= (walk_y * WALK_TILE + WALK_TILE); y += WALK_TILE) {
+	for (int x = walk_x * Const::WALK_TILE; x <= (walk_x * Const::WALK_TILE + Const::WALK_TILE); x += Const::WALK_TILE) {
+		for (int y = walk_y * Const::WALK_TILE; y <= (walk_y * Const::WALK_TILE + Const::WALK_TILE); y += Const::WALK_TILE) {
 				
 			int i, j, nvert = polygon->size();
 			bool c = false;
 
 			for (i = 0, j = nvert - 1; i < nvert; j = i++) {
-				BWAPI::Position pos_i = polygon->at(i) * WALK_TILE;
-				BWAPI::Position pos_j = polygon->at(j) * WALK_TILE;
+				BWAPI::Position pos_i = polygon->at(i) * Const::WALK_TILE;
+				BWAPI::Position pos_j = polygon->at(j) * Const::WALK_TILE;
 
 				if (((pos_i.y > y) != (pos_j.y > y)) &&
 					(x < (pos_j.x - pos_i.x) * (y - pos_i.y) / (pos_j.y - pos_i.y) + pos_i.x)) {
@@ -100,14 +101,14 @@ bool Terrain::isReachable(int sx, int sy, int ex, int ey) {
 }
 
 void Terrain::drawPolygons() {
-	for (int p = 0; p < regionsPolygons.size(); p++) {
+	for (unsigned int p = 0; p < regionsPolygons.size(); p++) {
 		BWTA::Polygon pol = regionsPolygons.at(p);
 		for (int j = 0; j< (int)pol.size(); j++) {
 			Broodwar->drawLineMap(pol.at(j) * 8, pol.at((j + 1) % pol.size()) * 8, BWAPI::Colors::Green);
 		}
 	}
 
-	for (int p = 0; p < unwalkablePolygons.size(); p++) {
+	for (unsigned int p = 0; p < unwalkablePolygons.size(); p++) {
 		BWTA::Polygon pol = unwalkablePolygons.at(p);
 		for (int j = 0; j< (int)pol.size(); j++) {
 			Broodwar->drawLineMap(pol.at(j), pol.at((j + 1) % pol.size()), BWAPI::Colors::Orange);

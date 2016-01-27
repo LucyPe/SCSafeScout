@@ -3,6 +3,7 @@
 
 class Node {
 private:
+	// in walk tiles
 	std::pair<int, int> position;
 
 	std::vector<Node*> neighbours;

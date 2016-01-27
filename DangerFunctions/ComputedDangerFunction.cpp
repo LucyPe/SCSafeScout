@@ -9,6 +9,7 @@ ComputedDangerFunction::ComputedDangerFunction(BWAPI::UnitType enemy) : DangerFu
 ComputedDangerFunction::~ComputedDangerFunction() {}
 
 double ComputedDangerFunction::compute(double dist) {
+	dist *= 32;
 	if (unitPtr != NULL) {
 		int index = (int)unitPtr->isFlying();
 
