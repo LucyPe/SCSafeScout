@@ -19,6 +19,7 @@ bool PATH = true;
 bool MOVE = true;
 
 Position position;
+bool side = 1;
 
 void ExampleAIModule::onStart() {
 	//CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
@@ -27,7 +28,7 @@ void ExampleAIModule::onStart() {
 
 	pathfinder = new SafePathFinder(BroodwarPtr);
 	scout = NULL;
-	position = Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight());
+	position = Utility::getTrainPosition(&side);
 
 	if (Const::NO_GUI) {
 		Broodwar->setLocalSpeed(0);
@@ -72,7 +73,7 @@ void ExampleAIModule::onFrame() {
 	if (Const::ENEMY_RANGE) pathfinder->drawEnemiesAttackRange();
 
 	frame++;
-	if (Const::LEARNING && frame >= 10000) Broodwar->restartGame();
+	//if (Const::LEARNING && frame >= 10000) Broodwar->restartGame();
 
 	if (setScout()) {
 
@@ -83,7 +84,12 @@ void ExampleAIModule::onFrame() {
 		}
 
 		// move
-		if (MOVE) pathfinder->moveUnit(position, frame);
+		if (MOVE) {
+			if (!pathfinder->moveUnit(position, frame)){
+				position = Utility::getTrainPosition(&side);
+				pathfinder->changePosition(position);
+			}
+		}
 	}
 }
 

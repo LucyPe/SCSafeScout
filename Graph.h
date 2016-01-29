@@ -19,6 +19,8 @@ private:
 	std::multimap<double, Node*> open_f;
 	std::map<std::pair<int, int>, Node*> closed;
 	
+	std::map<BWAPI::UnitType, double> lastStates;
+
 	void initNodes();
 	void deleteNodes();
 	void resetNodes();
@@ -26,18 +28,13 @@ private:
 	void createEdge(int, int, int, int);
 
 	int getIndex(int, int);
-	//double distance(std::pair<int, int>, std::pair<int, int>);
-	//double distance(int, int, int, int);
+
+	void resetDangerFunctions();
 	DangerFunction* getDangerFunction(BWAPI::UnitType);
 	void updateDanger();
 	double getNodeCost(Node*, int, BWAPI::UnitInterface*, double);
-	//double danger(int);
-
-	//double euklid(std::pair<int, int>, std::pair<int, int>);
 
 	std::vector<BWAPI::Position> getPath(Node*);
-
-	std::map<BWAPI::UnitType, double> lastStates;
 
 public:
 	Graph(BWAPI::Game*);
@@ -48,9 +45,6 @@ public:
 	std::vector<BWAPI::Position> AStar(BWAPI::Position, BWAPI::Position, BWAPI::UnitInterface*, double);
 	std::vector<Node*> getNodes();
 
-	void setUnit(BWAPI::UnitInterface*);
+	void setUnitPointer(BWAPI::UnitInterface*);
 	void updateDangerFunctions(BWAPI::UnitInterface*);
-
-	//void resetDanger();
-	//void updateDanger(int, int, double);
 };

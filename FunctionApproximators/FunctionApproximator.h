@@ -30,6 +30,8 @@ public:
 	virtual vector<double> error(vector<double>, vector<double>) { return vector<double>(); };
 	// params: input, output, target
 	virtual void adjust(vector<double>, vector<double>, vector<double>) {};
+	// params: input, output
+	void adjustToZero(vector<double>, vector<double>);
 
 	virtual void saveToFile() {};
 };

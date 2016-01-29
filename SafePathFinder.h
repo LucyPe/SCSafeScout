@@ -23,7 +23,7 @@ public:
 	void setUnit(BWAPI::UnitInterface*, double);
 
 	void changePosition(BWAPI::Position);
-	void moveUnit(BWAPI::Position, int);
+	bool moveUnit(BWAPI::Position, int);
 
 	void showGrid();
 	void showPath();

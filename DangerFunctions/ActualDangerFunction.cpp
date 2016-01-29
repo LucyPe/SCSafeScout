@@ -23,6 +23,14 @@ void ActualDangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 	hp = (unitPtr->getHitPoints() + unitPtr->getShields());
 }
 
+void ActualDangerFunction::setToZero() {
+	for (double i = 0; i < Const::MAX_RANGE; i++) {
+		vector<double> input = createInput(i / Const::MAX_RANGE);
+		vector<double> output = FA->compute(input);
+		FA->adjustToZero(createInput(i / Const::MAX_RANGE), output);
+	}
+}
+
 void ActualDangerFunction::learn(double dist) {
 	if (unitPtr != NULL) {
 		double actualHp = (unitPtr->getHitPoints() + unitPtr->getShields());

@@ -44,7 +44,7 @@ RBF::~RBF(void) {
 
 double RBF::norm(vector<double> x, vector<double> y) {
 	double res = 0;
-	for (int i = 0; i < x.size(); i++) {
+	for (unsigned int i = 0; i < x.size(); i++) {
 		res += (x[i] - y[i]) * (x[i] - y[i]);
 	}
 	return sqrt(res);
@@ -63,7 +63,7 @@ void RBF::init_fixed(double start, double radius) {
 
 void RBF::init_random(vector<vector<double>> data) {
 	std::set<int> randoms;
-	if (data.size() >= neurons) {
+	if (data.size() >= (size_t)neurons) {
 		for (int i = 0; i < neurons; i++) {
 			int x;
 			//do {
@@ -105,9 +105,9 @@ void RBF::init_fixed(double start, double radius) {
 void RBF::init_self_organization(vector<vector<double>> data, int ep_total) {
 	init_random(data);
 	for (int ep = 0; ep < ep_total; ep++) {
-		for (int k = 0; k < data.size(); k++) {
+		for (size_t k = 0; k < data.size(); k++) {
 			//find winner
-			double min_i = 0;
+			int min_i = 0;
 			double min = norm(data[k], w->getRow(0));
 			//cout << "min:" << min << " " << min_i << endl;
 
@@ -156,7 +156,7 @@ void RBF::print() {
 
 vector<double> RBF::error(vector<double> target, vector<double> output) {
 	vector<double> res;
-	for (int i = 0; i < target.size(); i++) {
+	for (unsigned int i = 0; i < target.size(); i++) {
 		res.push_back(target[i] - output[i]);
 	}
 	return res;

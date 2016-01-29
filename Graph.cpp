@@ -47,6 +47,7 @@ Graph::Graph(BWAPI::Game* g) {
 			BWAPI::UnitTypes::Zerg_Drone,
 			new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Drone.toString() + ".txt"));
 	}	
+	resetDangerFunctions();
 }
 
 Graph::~Graph() {
@@ -145,8 +146,16 @@ void Graph::createEdge(int from, int index, int w, int h) {
 }
 
 //FUNCTIONS
+
 int Graph::getIndex(int w, int h) {
 	return (h * width + w);
+}
+
+// set output of all danger functions to 0
+void Graph::resetDangerFunctions() {
+	for (std::map<BWAPI::UnitType, DangerFunction*>::iterator itr = dangerFunctions.begin(); itr != dangerFunctions.end(); ++itr) {
+		itr->second->setToZero();
+	}
 }
 
 //return new ComputatedDangerFunction if no function is found
@@ -158,7 +167,7 @@ DangerFunction* Graph::getDangerFunction(BWAPI::UnitType unitType) {
 }
 
 // set unit pointer to all danger functions
-void  Graph::setUnit(BWAPI::UnitInterface* unit) {
+void  Graph::setUnitPointer(BWAPI::UnitInterface* unit) {
 	for (std::map<BWAPI::UnitType, DangerFunction*>::iterator itr = dangerFunctions.begin(); itr != dangerFunctions.end(); ++itr) {
 		itr->second->setUnitPtr(unit);
 	}
@@ -170,7 +179,7 @@ double Graph::getNodeCost(Node* node, int i, BWAPI::UnitInterface* unit, double 
 	//double max = unit->getType().maxHitPoints() + unit->getType().maxShields();
 	if (!node->isUpdated(i)) {
 		Node* n = node->getNeighbour(i);
-		BWAPI::Unitset units = Broodwar->getUnitsInRadius(n->getX() * Const::WALK_TILE, n->getY() * Const::WALK_TILE, Const::MAX_RANGE);
+		BWAPI::Unitset units = Broodwar->getUnitsInRadius(n->getX() * Const::WALK_TILE, n->getY() * Const::WALK_TILE, (int) Const::MAX_RANGE);
 		// for each enemy compute danger for node
 		for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
 			if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
@@ -181,33 +190,29 @@ double Graph::getNodeCost(Node* node, int i, BWAPI::UnitInterface* unit, double 
 		}
 		//Broodwar->sendText("update %d", (int) danger);
 		if (danger < 0) danger = 0;
-		node->setDangerCost(i, danger * 40);
+		node->setDangerCost(i, danger);
 	}
 	return node->getCost(i, weight);
 }
 
-
 void Graph::updateDangerFunctions(BWAPI::UnitInterface* unit) {
+	//learn for old states
+	for (std::map<BWAPI::UnitType, double>::iterator iterator = lastStates.begin(); iterator != lastStates.end(); iterator++) {
+		getDangerFunction(iterator->first)->learn(iterator->second);
+	}
+
+	//add new states
 	std::map<BWAPI::UnitType, double> newStates = std::map<BWAPI::UnitType, double>();
-
-	BWAPI::Unitset units = Broodwar->getUnitsInRadius(unit->getPosition().x, unit->getPosition().y, Const::MAX_RANGE);
-	if (lastStates.size() > 0) {
-		for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
-			if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
-				BWAPI::UnitType enemyType = (*enemy)->getType();
-				if (lastStates.find(enemyType) == lastStates.end()) {
-					getDangerFunction((*enemy)->getType())->learn(lastStates[enemyType]);
-				}
-
-				BWAPI::Position pos = (*enemy)->getPosition();
-				double dist = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
-				newStates[enemyType] = dist / Const::MAX_RANGE;
-			}
+	BWAPI::Unitset units = Broodwar->getUnitsInRadius(unit->getPosition().x, unit->getPosition().y, (int) Const::MAX_RANGE);
+	for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
+		if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
+			BWAPI::Position pos = (*enemy)->getPosition();
+			double dist = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
+			newStates[(*enemy)->getType()] = dist / Const::MAX_RANGE;
 		}
 	}
 	lastStates = newStates;
 }
-
 
 //A*
 std::vector<BWAPI::Position> Graph::getPath(Node* current) {

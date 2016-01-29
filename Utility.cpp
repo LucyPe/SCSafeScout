@@ -64,6 +64,21 @@ BWAPI::Position Utility::getMousePosition(BWAPI::Game* Broodwar) {
 	return pos.makeValid();
 }
 
+BWAPI::Position Utility::getTrainPosition(bool *side) {
+	int x, y = 1320;
+	int rx = (rand() % 201) - 100;
+	int ry = (rand() % 201) - 100;
+	if ((*side)) {
+		x = 400;
+	}
+	else {
+		x = 1600;
+	}
+	(*side) = !(*side);
+	BWAPI::Position pos = BWAPI::Position(x + rx, y + ry);
+	return pos.makeValid();
+}
+
 void Utility::printToFile(std::string fileName, std::string line) {
 	std::ofstream file;
 	file.open(fileName, std::ofstream::out | std::ofstream::app);

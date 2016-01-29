@@ -6,6 +6,7 @@ SafePathFinder::SafePathFinder(BWAPI::Game* g) {
 	Broodwar = g;
 	path = std::vector<BWAPI::Position>();
 	map = new Graph(g);
+	unit = NULL;
 }
 
 SafePathFinder::~SafePathFinder() {
@@ -15,6 +16,7 @@ SafePathFinder::~SafePathFinder() {
 void SafePathFinder::setUnit(BWAPI::UnitInterface* u, double w) {
 	unit = u;
 	dangerWeight = w;
+	map->setUnitPointer(unit);
 }
 
 bool SafePathFinder::existPath() {
@@ -27,7 +29,6 @@ BWAPI::Position SafePathFinder::nextPosition() {
 
 bool SafePathFinder::findPath(BWAPI::Position start, BWAPI::Position end) {
 	if (unit != NULL) {
-		map->setUnit(unit);
 		path = map->AStar(start, end, unit, dangerWeight);
 
 		// smoothness hack
@@ -41,39 +42,40 @@ bool SafePathFinder::findPath(BWAPI::Position start, BWAPI::Position end) {
 }
 
 void SafePathFinder::changePosition(BWAPI::Position position) {
-	//Broodwar->sendText("pos %d, %d", position.x, position.y);
 	if (unit != NULL) {
 		findPath(unit->getPosition(), position);
 	}
 }
 
 
-void SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
+bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
 	if (unit != NULL) {
-
 		BWAPI::Unitset enemies = unit->getUnitsInRadius(Const::MAX_RANGE);
-
 		if (existPath()) {
 			unit->move(nextPosition());
 			if (Utility::PositionInRange(nextPosition(), unit->getPosition(), Const::WALK_TILE * 10)) {
 				path.pop_back();
 
 				// update FA
-				if (Const::LEARNING && (frame % 50 == 0)) map->updateDangerFunctions(unit);
+				if (Const::LEARNING && (frame % Const::LEARNING_FRAME_RATE == 0)) map->updateDangerFunctions(unit);
 
 				// if enemy is near -> recalculate path
 				if (!enemies.empty())  {
 					findPath(unit->getPosition(), position);
 				}
-			}
-			if (Const::LEARNING && (path.size() <= 10)) Broodwar->restartGame();
+			}			
+			/*if (Const::LEARNING && (path.size() <= 3)) {
+				Broodwar->restartGame();
+			}*/
+			return true;			
 		}
-		else {
+		/*else {
 			if (!findPath(unit->getPosition(), position)) {
 				changePosition(Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight()));
 			}
-		}
+		}*/
 	}
+	return false;
 }
 
 void SafePathFinder::showGrid() {

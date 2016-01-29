@@ -23,6 +23,7 @@ namespace Utility {
 	// map width, map height
 	BWAPI::Position getRandomPosition(int, int);
 	BWAPI::Position getMousePosition(BWAPI::Game*);
+	BWAPI::Position getTrainPosition(bool*);
 
 	//file
 	void printToFile(std::string file, std::string line);
