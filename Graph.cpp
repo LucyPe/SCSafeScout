@@ -21,7 +21,7 @@ Graph::Graph(BWAPI::Game* g) {
 
 	/* Functions*/
 
-	if (Const::FA) {	// MLP
+	if (!Const::FA) {	// MLP
 		dangerFunctions[BWAPI::UnitTypes::Zerg_Mutalisk] = new ActualDangerFunction(
 			BWAPI::UnitTypes::Zerg_Mutalisk,
 			new MLP(1, 1, Const::NEURONS, Const::ALPHA, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Mutalisk.toString() + ".txt"));
@@ -192,7 +192,7 @@ void Graph::updateDangerFunctions(BWAPI::UnitInterface* unit) {
 		if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
 			BWAPI::Position pos = (*enemy)->getPosition();
 			double dist = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
-			getDangerFunction((*enemy)->getType())->learn(dist);
+			getDangerFunction((*enemy)->getType())->learn(dist / Const::MAX_RANGE);
 		}
 	}
 }

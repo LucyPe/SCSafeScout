@@ -27,10 +27,13 @@ void ActualDangerFunction::learn(double dist) {
 	if (unitPtr != NULL) {
 		double actualHp = (unitPtr->getHitPoints() + unitPtr->getShields());
 		vector<double> input = createInput(dist);
-
+		vector<double> output = FA->compute(input);
+		vector<double> target = createInput((hp - actualHp) / maxHp);
 		//Utility::printToFile(Const::PATH_DEBUG, std::to_string((hp - actualHp) / maxHp));
 		
-		FA->adjust(input, FA->compute(input), createInput((hp - actualHp) / maxHp));
+		if (FA->error(target, output)[0] != 0) {
+			FA->adjust(input, output, target);
+		}
 
 		/*testFile.open("bwapi-data/write/gg.txt", std::ofstream::out | std::ofstream::app);
 		if (testFile.is_open()) {

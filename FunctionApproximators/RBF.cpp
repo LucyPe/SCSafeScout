@@ -2,6 +2,7 @@
 #include "RBF.h"
 #include "../Utility.h"
 #include <set>
+#include <string>
 
 RBF::RBF(int i, int o, int h, double a, double s, double start, double radius, string f) : FunctionApproximator(i, o, a, f) {
 	ifstream input;
@@ -162,7 +163,9 @@ vector<double> RBF::error(vector<double> target, vector<double> output) {
 }
 
 void RBF::adjust(vector<double> input, vector<double> output, vector<double> target) {
-	adjust_weight(error(target, output), v, hidden);
+	vector<double> err = error(target, output);
+	adjust_weight(err, v, hidden);
+	Utility::printToFile("bwapi-data/write/gg.txt", "E:"  + std::to_string(err[0]) + " V: " + v->toString());
 }
 
 double RBF::RBFunction(vector<double> input, vector<double> center) {

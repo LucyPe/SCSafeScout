@@ -48,7 +48,7 @@ void SafePathFinder::moveUnit(BWAPI::UnitInterface* unit, BWAPI::Position positi
 			path.pop_back();
 
 			// update FA
-			if (Const::LEARNING && (frame % 100 == 0)) map->updateDangerFunctions(unit);
+			if (Const::LEARNING && (frame % 50 == 0)) map->updateDangerFunctions(unit);
 
 			// if enemy is near -> recalculate path
 			if (!enemies.empty())  {
