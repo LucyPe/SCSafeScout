@@ -28,7 +28,7 @@ public:
 
 	void resetDangerCost();
 
-	double getCost(int);
+	double getCost(int, double);
 	double getTerrainCost(int);
 	double getDangerCost(int);
 

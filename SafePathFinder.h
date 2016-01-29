@@ -9,16 +9,21 @@ private:
 	Graph* map;
 	std::vector<BWAPI::Position> path;
 
+	BWAPI::UnitInterface* unit;
+	double dangerWeight;
+
 	bool existPath();
-	bool findPath(BWAPI::Position, BWAPI::Position, BWAPI::UnitInterface*);
+	bool findPath(BWAPI::Position, BWAPI::Position);
 	BWAPI::Position nextPosition();
 	
 public:
 	SafePathFinder(BWAPI::Game*);
 	~SafePathFinder();
 
-	void changePosition(BWAPI::Position, BWAPI::UnitInterface*);
-	void moveUnit(BWAPI::UnitInterface*, BWAPI::Position, int frame);
+	void setUnit(BWAPI::UnitInterface*, double);
+
+	void changePosition(BWAPI::Position);
+	void moveUnit(BWAPI::Position, int);
 
 	void showGrid();
 	void showPath();

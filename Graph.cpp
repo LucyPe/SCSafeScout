@@ -16,7 +16,8 @@ Graph::Graph(BWAPI::Game* g) {
 	terrain = new Terrain(g, width, height);
 	map = std::vector<Node*>();
 	dangerFunctions = std::map<BWAPI::UnitType, DangerFunction*>();
-	
+	lastStates = std::map<BWAPI::UnitType, double>();
+
 	initNodes();
 
 	/* Functions*/
@@ -164,7 +165,7 @@ void  Graph::setUnit(BWAPI::UnitInterface* unit) {
 }
 
 // update e(node, i) cost and return its value
-double Graph::getNodeCost(Node* node, int i, BWAPI::UnitInterface* unit) {
+double Graph::getNodeCost(Node* node, int i, BWAPI::UnitInterface* unit, double weight) {
 	double danger = 0;
 	//double max = unit->getType().maxHitPoints() + unit->getType().maxShields();
 	if (!node->isUpdated(i)) {
@@ -182,19 +183,29 @@ double Graph::getNodeCost(Node* node, int i, BWAPI::UnitInterface* unit) {
 		if (danger < 0) danger = 0;
 		node->setDangerCost(i, danger * 40);
 	}
-	return node->getCost(i);
+	return node->getCost(i, weight);
 }
 
 
 void Graph::updateDangerFunctions(BWAPI::UnitInterface* unit) {
+	std::map<BWAPI::UnitType, double> newStates = std::map<BWAPI::UnitType, double>();
+
 	BWAPI::Unitset units = Broodwar->getUnitsInRadius(unit->getPosition().x, unit->getPosition().y, Const::MAX_RANGE);
-	for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
-		if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
-			BWAPI::Position pos = (*enemy)->getPosition();
-			double dist = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
-			getDangerFunction((*enemy)->getType())->learn(dist / Const::MAX_RANGE);
+	if (lastStates.size() > 0) {
+		for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
+			if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
+				BWAPI::UnitType enemyType = (*enemy)->getType();
+				if (lastStates.find(enemyType) == lastStates.end()) {
+					getDangerFunction((*enemy)->getType())->learn(lastStates[enemyType]);
+				}
+
+				BWAPI::Position pos = (*enemy)->getPosition();
+				double dist = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
+				newStates[enemyType] = dist / Const::MAX_RANGE;
+			}
 		}
 	}
+	lastStates = newStates;
 }
 
 
@@ -209,7 +220,7 @@ std::vector<BWAPI::Position> Graph::getPath(Node* current) {
 	return result;
 }
 
-std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, BWAPI::UnitInterface* unit) {
+std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, BWAPI::UnitInterface* unit, double weight) {
 	std::pair<int, int> start = std::pair<int, int>(Utility::PositionToWalkPosition(s.x), Utility::PositionToWalkPosition(s.y));
 	std::pair<int, int> end = std::pair<int, int>(Utility::PositionToWalkPosition(e.x), Utility::PositionToWalkPosition(e.y));
 
@@ -244,7 +255,7 @@ std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, 
 		for (int i = 0; i < 8; i++) {
 			Node* neighbour = current->getNeighbour(i);
 			if (neighbour == NULL) continue;
-			double g_score = current->g + getNodeCost(current, i, unit);
+			double g_score = current->g + getNodeCost(current, i, unit, weight);
 
 			if (g_score < neighbour->g) {
 				neighbour->prev = current;

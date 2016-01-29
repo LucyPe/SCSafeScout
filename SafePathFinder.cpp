@@ -12,6 +12,11 @@ SafePathFinder::~SafePathFinder() {
 	delete(map);
 }
 
+void SafePathFinder::setUnit(BWAPI::UnitInterface* u, double w) {
+	unit = u;
+	dangerWeight = w;
+}
+
 bool SafePathFinder::existPath() {
 	return path.size() != 0;
 }
@@ -20,46 +25,53 @@ BWAPI::Position SafePathFinder::nextPosition() {
 	return path[path.size() - 1];
 }
 
-bool SafePathFinder::findPath(BWAPI::Position start, BWAPI::Position end, BWAPI::UnitInterface* unit) {
-	map->setUnit(unit);
-	path = map->AStar(start, end, unit);
+bool SafePathFinder::findPath(BWAPI::Position start, BWAPI::Position end) {
+	if (unit != NULL) {
+		map->setUnit(unit);
+		path = map->AStar(start, end, unit, dangerWeight);
 
-	// smoothness hack
-	if (path.size() > 7) {
-		for (int i = 0; i < 5; i++) {
-			path.pop_back();
+		// smoothness hack
+		if (path.size() > 7) {
+			for (int i = 0; i < 5; i++) {
+				path.pop_back();
+			}
 		}
 	}
 	return path.size() != 0;
 }
 
-void SafePathFinder::changePosition(BWAPI::Position position, BWAPI::UnitInterface* unit) {
+void SafePathFinder::changePosition(BWAPI::Position position) {
 	//Broodwar->sendText("pos %d, %d", position.x, position.y);
-	findPath(unit->getPosition(), position, unit);
+	if (unit != NULL) {
+		findPath(unit->getPosition(), position);
+	}
 }
 
 
-void SafePathFinder::moveUnit(BWAPI::UnitInterface* unit, BWAPI::Position position, int frame) {
-	BWAPI::Unitset enemies = unit->getUnitsInRadius(Const::MAX_RANGE);
+void SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
+	if (unit != NULL) {
 
-	if (existPath()) {
-		unit->move(nextPosition());
-		if (Utility::PositionInRange(nextPosition(), unit->getPosition(), Const::WALK_TILE * 10)) {
-			path.pop_back();
+		BWAPI::Unitset enemies = unit->getUnitsInRadius(Const::MAX_RANGE);
 
-			// update FA
-			if (Const::LEARNING && (frame % 50 == 0)) map->updateDangerFunctions(unit);
+		if (existPath()) {
+			unit->move(nextPosition());
+			if (Utility::PositionInRange(nextPosition(), unit->getPosition(), Const::WALK_TILE * 10)) {
+				path.pop_back();
 
-			// if enemy is near -> recalculate path
-			if (!enemies.empty())  {
-				findPath(unit->getPosition(), position, unit);
+				// update FA
+				if (Const::LEARNING && (frame % 50 == 0)) map->updateDangerFunctions(unit);
+
+				// if enemy is near -> recalculate path
+				if (!enemies.empty())  {
+					findPath(unit->getPosition(), position);
+				}
 			}
+			if (Const::LEARNING && (path.size() <= 10)) Broodwar->restartGame();
 		}
-		if (Const::LEARNING && (path.size() <= 10)) Broodwar->restartGame();
-	}
-	else {
-		if (!findPath(unit->getPosition(), position, unit)) {
-			changePosition(Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight()),unit);
+		else {
+			if (!findPath(unit->getPosition(), position)) {
+				changePosition(Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight()));
+			}
 		}
 	}
 }

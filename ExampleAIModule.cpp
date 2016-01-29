@@ -79,11 +79,11 @@ void ExampleAIModule::onFrame() {
 		// new position - mouse click
 		if (Broodwar->getKeyState(BWAPI::Key::K_RBUTTON)) {
 			position = Utility::getMousePosition(BroodwarPtr);
-			pathfinder->changePosition(position, scout);
+			pathfinder->changePosition(position);
 		}
 
 		// move
-		if (MOVE) pathfinder->moveUnit(scout, position, frame);
+		if (MOVE) pathfinder->moveUnit(position, frame);
 	}
 }
 
@@ -104,9 +104,9 @@ void ExampleAIModule::onSendText(std::string text) {
 		MOVE = !MOVE;
 	} else if (text == "r") {
 		position = Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight());
-		pathfinder->changePosition(position, scout);		
+		pathfinder->changePosition(position);		
 	} else if (text == "p") {
-		pathfinder->changePosition(position, scout);
+		pathfinder->changePosition(position);
 	} else if (text == "q") {
 		Broodwar->restartGame();
 	} else if (text == "f") {
@@ -216,6 +216,7 @@ bool ExampleAIModule::setScout() {
 
 		if (!u->getType().isBuilding()) {
 			scout = u;
+			pathfinder->setUnit(scout, Const::DANGER_WEIGTH);
 			return true;
 		}
 	}

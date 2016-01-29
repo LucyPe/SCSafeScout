@@ -2,6 +2,9 @@
 
 namespace Const {
 
+	// <0,1>
+	const double DANGER_WEIGTH = 1;
+
 	const bool LEARNING = 1;
 	const bool NO_GUI = 0;
 

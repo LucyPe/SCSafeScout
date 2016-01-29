@@ -30,12 +30,14 @@ private:
 	//double distance(int, int, int, int);
 	DangerFunction* getDangerFunction(BWAPI::UnitType);
 	void updateDanger();
-	double getNodeCost(Node*, int, BWAPI::UnitInterface*);
+	double getNodeCost(Node*, int, BWAPI::UnitInterface*, double);
 	//double danger(int);
 
 	//double euklid(std::pair<int, int>, std::pair<int, int>);
 
 	std::vector<BWAPI::Position> getPath(Node*);
+
+	std::map<BWAPI::UnitType, double> lastStates;
 
 public:
 	Graph(BWAPI::Game*);
@@ -43,11 +45,12 @@ public:
 
 	Terrain* getTerrain();
 
-	std::vector<BWAPI::Position> AStar(BWAPI::Position, BWAPI::Position, BWAPI::UnitInterface*);
+	std::vector<BWAPI::Position> AStar(BWAPI::Position, BWAPI::Position, BWAPI::UnitInterface*, double);
 	std::vector<Node*> getNodes();
 
 	void setUnit(BWAPI::UnitInterface*);
 	void updateDangerFunctions(BWAPI::UnitInterface*);
+
 	//void resetDanger();
 	//void updateDanger(int, int, double);
 };

@@ -53,8 +53,8 @@ void Node::resetDangerCost() {
 	dangerUpdate = std::vector<bool>(8, false);
 };
 
-double Node::getCost(int i) {
-	return terrainCosts[i] + dangerCosts[i];
+double Node::getCost(int i, double weight) {
+	return terrainCosts[i] + weight * dangerCosts[i];
 }
 
 double Node::getDangerCost(int i) {
