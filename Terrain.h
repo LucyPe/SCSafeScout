@@ -25,9 +25,8 @@ public:
 	int getWalkabilityData(int, int);
 	bool isWalkable(int, int);
 	bool isReachable(int, int, int, int);
-	
-	void drawPolygons();
 
+	void drawPolygons();
 
 };
 

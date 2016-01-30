@@ -3,7 +3,8 @@
 
 Node::Node(std::pair<int, int> p) {
 	neighbours = std::vector<Node*>(8, NULL);
-	disabled = std::vector<bool>(8, false);
+	//disabled = std::vector<bool>(8, false);
+	occupied = false;
 
 	terrainCosts = std::vector<double>(8, INT_MAX);
 	resetDangerCost();
@@ -29,30 +30,31 @@ int Node::getY() {
 	return position.second;
 }
 
+//STATUS
+bool Node::isUpdated(int i) {
+	return dangerUpdate[i];
+}
+
+bool Node::isOccupied() {
+	return occupied;
+}
+
+void Node::setOccupied(bool b) {
+	occupied = b;
+}
+
 //NEIGHBOURS
 Node* Node::getNeighbour(int i) {
-	if (disabled[i]) return NULL;
-	return neighbours[i];
+	Node* n = neighbours[i];
+	if (n != NULL && n->isOccupied()) return NULL;
+	return n;
 }
 
 void Node::setNeighbour(int i, Node* n) {
 	neighbours[i] = n;
 }
 
-void Node::disableNeighbour(int i) {
-	disabled[i] = true;
-}
-
-void Node::resetNeighbours() {
-	disabled = std::vector<bool>(8, false);
-}
-
 //COST
-void Node::resetDangerCost() {
-	dangerCosts = std::vector<double>(8, 0.0);
-	dangerUpdate = std::vector<bool>(8, false);
-};
-
 double Node::getCost(int i, double weight) {
 	return terrainCosts[i] + weight * dangerCosts[i];
 }
@@ -74,18 +76,7 @@ void Node::setDangerCost(int i, double d) {
 	dangerUpdate[i] = true;
 }
 
-bool Node::isUpdated(int i) {
-	return dangerUpdate[i];
-}
-
-/*
-void Node::setDanger(int danger) {
-	for (int i = 0; i < 8; i++) {
-		Node* neighbour = getNeighbour(i);
-		if (neighbour != NULL) {
-			neighbour->updateDangerCost((i + 4) % 8, danger);
-		}
-	}
-}*/
-
-
+void Node::resetDangerCost() {
+	dangerCosts = std::vector<double>(8, 0.0);
+	dangerUpdate = std::vector<bool>(8, false);
+};

@@ -19,15 +19,15 @@ private:
 	double triangleRBF(double);
 
 public:
-	// params: input, output, kernels, alpha, sigma, center_start, cener_radius, file
-	RBF(int, int, int, double, double, double, double, string);
+	// params: input, output, kernels, alpha, sigma, center_start, cener_radius, file, zero_output
+	RBF(int, int, int, double, double, double, double, string, bool = false);
 	~RBF(void);
 
 	void saveToFile();
 
-	void init_random(vector<vector<double>>);
+	//void init_random(vector<vector<double>>);
 	void init_fixed(double, double);
-	void init_self_organization(vector<vector<double>>, int);
+	//void init_self_organization(vector<vector<double>>, int);
 
 	// params: input
 	vector<double> compute(vector<double>);
@@ -35,9 +35,5 @@ public:
 	vector<double> error(vector<double>, vector<double>);
 	// params: input, output, target
 	void adjust(vector<double>, vector<double>, vector<double>);
-
-
-	/*Debug functions*/
-	void print();
 };
 

@@ -10,7 +10,7 @@
 Matrix::Matrix(int a, int b) {
 	h = a;
 	w = b;
-	data.resize(w*h);
+	data.resize(w*h, 0);
 }
 
 Matrix::Matrix(vector<double> d) {

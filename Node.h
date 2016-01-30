@@ -5,9 +5,11 @@ class Node {
 private:
 	// in walk tiles
 	std::pair<int, int> position;
+	
+	// if there is unit or building
+	bool occupied;
 
 	std::vector<Node*> neighbours;
-	std::vector<bool> disabled;
 
 	std::vector<double> terrainCosts;
 	std::vector<double> dangerCosts;
@@ -21,24 +23,23 @@ public:
 	int getX();
 	int getY();
 
+	bool isUpdated(int);
+	bool isOccupied();
+	void setOccupied(bool);
+
 	Node* getNeighbour(int);
 	void setNeighbour(int, Node*);
-	void disableNeighbour(int);
-	void resetNeighbours();
-
-	void resetDangerCost();
 
 	double getCost(int, double);
 	double getTerrainCost(int);
 	double getDangerCost(int);
+	void resetDangerCost();
 
-	bool isUpdated(int);
 
 	void setTerrainCost(int, double);
 	void setDangerCost(int, double);
-	//void setDanger(int);
 
-	/* AStar */
+	/* AStar vars */
 	double f;
 	double g;
 	Node* prev;

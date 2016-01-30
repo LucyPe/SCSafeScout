@@ -1,5 +1,7 @@
 #pragma once
 #include "FunctionApproximator.h"
+#include "../Utility.h"
+#include "../Const.h"
 
 FunctionApproximator::FunctionApproximator(int i, int o, double a, string file) {
 	inputs = i;
@@ -21,11 +23,9 @@ void FunctionApproximator::adjust_weight(vector<double> error, Matrix* weight, v
 void FunctionApproximator::adjustToZero(vector<double> input, vector<double> output) {
 	double old_alpha = alpha;
 	alpha = 1.0;
+	//Utility::printToFile(Const::PATH_WRITE + (string) "aa.txt", "alpha:" + std::to_string(alpha));
 
-	vector<double> target = vector<double>();
-	for (int i = 0; i <= output.size(); i++) {
-		target.push_back(-output[0]);
-	}
+	vector<double> target = vector<double>(output.size(), 0);
 	adjust(input, output, target);
 	alpha = old_alpha;
 }

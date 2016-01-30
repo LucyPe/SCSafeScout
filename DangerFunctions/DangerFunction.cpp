@@ -1,6 +1,7 @@
 #pragma once
 #include "DangerFunction.h"
 #include "../Const.h"
+#include <iomanip>
 
 DangerFunction::DangerFunction(BWAPI::UnitType enemy) {
 	enemyType = enemy;
@@ -22,8 +23,10 @@ void DangerFunction::visualize(string fileName) {
 	output.open(Const::PATH_WRITE + fileName, std::ofstream::out | std::ofstream::app);
 
 	if (output.is_open()) {
+		output << std::setprecision(10);
+
 		for (double i = 0; i < Const::MAX_RANGE; i++) {
-			output << compute(i / Const::MAX_RANGE) << ", ";
+			output << compute(i) << ", ";
 		}
 		output << endl;
 		output.close();

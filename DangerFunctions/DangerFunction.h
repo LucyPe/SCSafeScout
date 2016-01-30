@@ -18,9 +18,7 @@ public:
 	BWAPI::UnitType getEnemyType();
 	virtual void setUnitPtr(BWAPI::UnitInterface*);
 
-	virtual double compute(double dist) {
-		return 0;
-	};
+	virtual double compute(double dist) { return 0; };
 	virtual void learn(double dist) {};
 	virtual void setToZero() {};
 	void visualize(string);

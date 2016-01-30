@@ -19,5 +19,4 @@ public:
 
 	double compute(double);
 	void learn(double);
-	void setToZero();
 };

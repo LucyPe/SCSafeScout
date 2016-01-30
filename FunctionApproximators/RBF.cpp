@@ -1,16 +1,16 @@
 ﻿#pragma once
 #include "RBF.h"
 #include "../Utility.h"
+#include "../Const.h"
 #include <set>
 #include <string>
 
-RBF::RBF(int i, int o, int h, double a, double s, double start, double radius, string f) : FunctionApproximator(i, o, a, f) {
+RBF::RBF(int i, int o, int h, double a, double s, double start, double radius, string f, bool zero) : FunctionApproximator(i, o, a, f) {
 	ifstream input;
 	input.open(fileName);
 
 	// exists file
 	if (input.is_open()) {
-		cout << "loading RBF" << endl;
 		input >> inputs >> outputs >> neurons >> alpha >> sigma;
 		w = new Matrix(neurons, inputs);
 		for (int i = 0; i < w->size(); i++) {
@@ -33,7 +33,7 @@ RBF::RBF(int i, int o, int h, double a, double s, double start, double radius, s
 		w = new Matrix(neurons, inputs);
 		v = new Matrix(outputs, neurons);
 
-		v->random(neurons);
+		if (!zero) v->random(neurons);
 
 		init_fixed(start, radius);
 	}
@@ -56,11 +56,11 @@ void RBF::init_fixed(double start, double radius) {
 			w->set(j, i, start + radius * i);
 		}
 	}
-
 	Utility::printToFile("bwapi-data/write/gg.txt", w->toString());
 	Utility::printToFile("bwapi-data/write/gg.txt", v->toString());
 }
 
+/*
 void RBF::init_random(vector<vector<double>> data) {
 	std::set<int> randoms;
 	if (data.size() >= (size_t)neurons) {
@@ -88,19 +88,6 @@ void RBF::init_random(vector<vector<double>> data) {
 		}
 	}
 }
-/*
-void RBF::init_fixed(double start, double radius) {
-	double x = radius;
-	for (int i = 0; i < w->h; i++) {
-		for (int j = 0; j < w->w; j++) {
-			w->set(j, i, start + x * i);
-		}
-	}
-	cout << "init RBF" << endl;
-}
-*/
-
-
 
 void RBF::init_self_organization(vector<vector<double>> data, int ep_total) {
 	init_random(data);
@@ -138,6 +125,7 @@ void RBF::init_self_organization(vector<vector<double>> data, int ep_total) {
 		
 	}
 }
+*/
 
 void RBF::saveToFile() {
 	ofstream output;
@@ -148,10 +136,6 @@ void RBF::saveToFile() {
 		output << v->toString();
 		output.close();
 	}
-}
-
-void RBF::print() {
-	cout << w->toString() << endl;
 }
 
 vector<double> RBF::error(vector<double> target, vector<double> output) {
@@ -165,7 +149,8 @@ vector<double> RBF::error(vector<double> target, vector<double> output) {
 void RBF::adjust(vector<double> input, vector<double> output, vector<double> target) {
 	vector<double> err = error(target, output);
 	adjust_weight(err, v, hidden);
-	Utility::printToFile("bwapi-data/write/gg.txt", "E:"  + std::to_string(err[0]) + " V: " + v->toString());
+	//Utility::printToFile(Const::PATH_WRITE + (string) "aa.txt", "adjust");
+	//Utility::printToFile("bwapi-data/write/gg.txt", "E:"  + std::to_string(err[0]) + " V: " + v->toString());
 }
 
 double RBF::RBFunction(vector<double> input, vector<double> center) {
@@ -183,12 +168,10 @@ double RBF::triangleRBF(double dist) {
 	return sigma - dist;
 }
 
-
 vector<double> RBF::compute(vector<double> input) {
 	hidden.clear();
 	for (int i = 0; i < neurons; i++) {
 		hidden.push_back(RBFunction(input, w->getRow(i)));
 	}
 	return v->multi(hidden);
-	//return vector<double>();
 }

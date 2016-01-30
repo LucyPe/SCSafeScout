@@ -30,6 +30,8 @@ void ExampleAIModule::onStart() {
 	scout = NULL;
 	position = Utility::getTrainPosition(&side);
 
+	Broodwar->sendText("%s", "Black sheep wall");
+
 	if (Const::NO_GUI) {
 		Broodwar->setLocalSpeed(0);
 		Broodwar->setGUI(false);

@@ -1,5 +1,7 @@
 #pragma once
 #include "ComputedDangerFunction.h"
+#include "../Const.h"
+#include "../Utility.h"
 
 ComputedDangerFunction::ComputedDangerFunction(BWAPI::UnitType enemy) : DangerFunction(enemy) {
 	unitWeapons[0] = enemy.groundWeapon();
@@ -9,10 +11,8 @@ ComputedDangerFunction::ComputedDangerFunction(BWAPI::UnitType enemy) : DangerFu
 ComputedDangerFunction::~ComputedDangerFunction() {}
 
 double ComputedDangerFunction::compute(double dist) {
-	dist *= 32;
 	if (unitPtr != NULL) {
 		int index = (int)unitPtr->isFlying();
-
 		if ((dist < unitWeapons[index].minRange()) || (dist > unitWeapons[index].maxRange() + 2 * fmaxf(enemyType.width(), enemyType.height()))) {
 			return 0;
 		}

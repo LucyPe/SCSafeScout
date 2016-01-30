@@ -32,10 +32,8 @@ bool SafePathFinder::findPath(BWAPI::Position start, BWAPI::Position end) {
 		path = map->AStar(start, end, unit, dangerWeight);
 
 		// smoothness hack
-		if (path.size() > 7) {
-			for (int i = 0; i < 5; i++) {
-				path.pop_back();
-			}
+		for (int i = 0; (i < 5) && (i < path.size()); i++) {
+			path.pop_back();
 		}
 	}
 	return path.size() != 0;
