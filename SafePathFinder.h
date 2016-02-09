@@ -9,8 +9,10 @@ private:
 	Graph* map;
 	std::vector<BWAPI::Position> path;
 
-	BWAPI::UnitInterface* unit;
-	double dangerWeight;
+	BWAPI::UnitInterface* unit;	
+
+	void loadParams();
+	void saveParams();
 
 	bool existPath();
 	bool findPath(BWAPI::Position, BWAPI::Position);
@@ -19,6 +21,19 @@ private:
 public:
 	SafePathFinder(BWAPI::Game*);
 	~SafePathFinder();
+
+	double dangerWeight = -1;
+
+	/* Gui Params */
+	bool GRID = false;
+	bool PATH = true;
+	bool MOVE = true;
+	bool NO_GUI = false;
+
+	/* Model Params */
+	bool LEARNING = true;
+	
+	/**/
 
 	void setUnit(BWAPI::UnitInterface*, double);
 

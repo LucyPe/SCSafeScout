@@ -10,6 +10,8 @@ class Graph {
 private:
 	BWAPI::Game* Broodwar;
 	Terrain* terrain;
+	BWAPI::UnitInterface* unit;
+
 	std::map<BWAPI::UnitType, DangerFunction*> dangerFunctions;
 	std::vector<Node*> map; // positions in walktiles
 	int width;	// in walktiles x
@@ -31,11 +33,11 @@ private:
 
 	DangerFunction* getDangerFunction(BWAPI::UnitType);
 	void updateDanger();
-	double getNodeCost(Node*, int, BWAPI::UnitInterface*, double);
+	double getNodeCost(Node*, int, double);
 
 	std::vector<BWAPI::Position> getPath(Node*);
 
-	void updateUnits(BWAPI::UnitInterface*);
+	void updateUnits();
 
 public:
 	Graph(BWAPI::Game*);
@@ -43,9 +45,9 @@ public:
 
 	Terrain* getTerrain();
 
-	std::vector<BWAPI::Position> AStar(BWAPI::Position, BWAPI::Position, BWAPI::UnitInterface*, double);
+	std::vector<BWAPI::Position> AStar(BWAPI::Position, BWAPI::Position, double);
 	std::vector<Node*> getNodes();
 
 	void setUnitPointer(BWAPI::UnitInterface*);
-	void updateDangerFunctions(BWAPI::UnitInterface*);
+	void updateDangerFunctions();
 };

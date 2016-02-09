@@ -14,10 +14,6 @@ int frame = 0;
 SafePathFinder* pathfinder;
 UnitInterface* scout;
 
-bool GRID = false;
-bool PATH = true;
-bool MOVE = true;
-
 Position position;
 bool side = 1;
 
@@ -25,14 +21,16 @@ void ExampleAIModule::onStart() {
 	//CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
 	BWTA::analyze();
 	BWTA::readMap();
+	
 
 	pathfinder = new SafePathFinder(BroodwarPtr);
+
 	scout = NULL;
 	position = Utility::getTrainPosition(&side);
 
 	Broodwar->sendText("%s", "Black sheep wall");
 
-	if (Const::NO_GUI) {
+	if (pathfinder->NO_GUI) {
 		Broodwar->setLocalSpeed(0);
 		Broodwar->setGUI(false);
 	}
@@ -64,8 +62,8 @@ void ExampleAIModule::onFrame() {
 	Broodwar->drawTextScreen(10, 40, "XT: %d", (int)floor(((double)(((Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x)) / 32)) + 0.5));
 	Broodwar->drawTextScreen(10, 60, "YT: %d", (int)floor(((double)(((Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y)) / 32)) + 0.5));
 	
-	if (GRID) pathfinder->showGrid();
-	if (PATH) pathfinder->showPath();
+	if (pathfinder->GRID) pathfinder->showGrid();
+	if (pathfinder->PATH) pathfinder->showPath();
 
 	if (Const::TERRAIN_DATA) {
 		pathfinder->drawTerrainData();
@@ -86,7 +84,7 @@ void ExampleAIModule::onFrame() {
 		}
 
 		// move
-		if (MOVE) {
+		if (pathfinder->MOVE) {
 			if (!pathfinder->moveUnit(position, frame)){
 				position = Utility::getTrainPosition(&side);
 				pathfinder->changePosition(position);
@@ -105,11 +103,23 @@ void ExampleAIModule::onSendText(std::string text) {
 		}
 	}*/
 	if (text == "g") {
-		GRID = !GRID;
+		pathfinder->GRID = !pathfinder->GRID;
 	} else if (text == "s") {
-		PATH = !PATH;
+		pathfinder->PATH = !pathfinder->PATH;
 	} else if (text == "m") {
-		MOVE = !MOVE;
+		pathfinder->MOVE = !pathfinder->MOVE;
+	} else if (text == "n") {
+		pathfinder->NO_GUI = !pathfinder->NO_GUI;
+		if (pathfinder->NO_GUI) {
+			Broodwar->setLocalSpeed(0);
+			Broodwar->setGUI(false);
+		}
+		else {
+			Broodwar->setLocalSpeed(-1);
+			Broodwar->setGUI(true);
+		}
+	} else if (text == "l") {
+		pathfinder->LEARNING = !pathfinder->LEARNING;
 	} else if (text == "r") {
 		position = Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight());
 		pathfinder->changePosition(position);		
@@ -120,6 +130,12 @@ void ExampleAIModule::onSendText(std::string text) {
 	} else if (text == "f") {
 		text = "Black sheep wall";
 		Broodwar->sendText("%s", text.c_str());
+	} else if (text == "+") {
+		pathfinder->dangerWeight += 0.1;
+		Broodwar->sendText("%d", (int) (pathfinder->dangerWeight * 10));
+	} else if (text == "-") {
+		pathfinder->dangerWeight -= 0.1;
+		Broodwar->sendText("%d", (int) (pathfinder->dangerWeight * 10));
 	} else {
 		Broodwar->sendText("%s", text.c_str());
 	}

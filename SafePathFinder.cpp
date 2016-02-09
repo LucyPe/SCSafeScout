@@ -7,15 +7,40 @@ SafePathFinder::SafePathFinder(BWAPI::Game* g) {
 	path = std::vector<BWAPI::Position>();
 	map = new Graph(g);
 	unit = NULL;
+	loadParams();
 }
 
 SafePathFinder::~SafePathFinder() {
+	saveParams();
 	delete(map);
 }
 
+void SafePathFinder::loadParams(){
+	std::ifstream file;
+	file.open(Const::PATH_WRITE + (string)"params.txt");
+
+	if (file.is_open()) {
+		file >> GRID >> PATH >> MOVE >> NO_GUI >> LEARNING;
+		file >> dangerWeight;
+		file.close();
+	}
+}
+
+void SafePathFinder::saveParams(){
+	std::ofstream file;
+	file.open(Const::PATH_WRITE + (string)"params.txt");
+
+	if (file.is_open()) {
+		file << GRID << " " << PATH << " " << MOVE << " " << NO_GUI << " " << LEARNING << endl;
+		file << dangerWeight << endl;
+		file.close();
+	}
+}
+
+
 void SafePathFinder::setUnit(BWAPI::UnitInterface* u, double w) {
 	unit = u;
-	dangerWeight = w;
+	if (dangerWeight == -1) dangerWeight = w;
 	map->setUnitPointer(unit);
 }
 
@@ -29,7 +54,7 @@ BWAPI::Position SafePathFinder::nextPosition() {
 
 bool SafePathFinder::findPath(BWAPI::Position start, BWAPI::Position end) {
 	if (unit != NULL) {
-		path = map->AStar(start, end, unit, dangerWeight);
+		path = map->AStar(start, end, dangerWeight);
 
 		// smoothness hack
 		for (int i = 0; (i < 5) && (i < path.size()); i++) {
@@ -55,10 +80,10 @@ bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
 				path.pop_back();
 
 				// update FA
-				if (Const::LEARNING && (frame % Const::LEARNING_FRAME_RATE == 0)) map->updateDangerFunctions(unit);
+				if (LEARNING && (frame % Const::LEARNING_FRAME_RATE == 0)) map->updateDangerFunctions();
 
 				// if enemy is near -> recalculate path
-				if (!enemies.empty())  {
+				if (!enemies.empty() || (frame % Const::PATH_UPDATE_FRAME_RATE == 0))  {
 					findPath(unit->getPosition(), position);
 				}
 			}			
@@ -116,10 +141,11 @@ void SafePathFinder::drawEnemiesAttackRange() {
 
 		for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
 			BWAPI::WeaponType weapon = (*enemy)->getType().groundWeapon();
-			int weaponRange = (int) (weapon.maxRange() + fmax((*enemy)->getType().height(), (*enemy)->getType().width()));
+			int weaponRange = (int) (weapon.maxRange()/* + fmax((*enemy)->getType().height(), (*enemy)->getType().width())*/);
 
 			BWAPI::Position position = (*enemy)->getPosition();
 			Broodwar->drawCircleMap(position.x, position.y, weaponRange, BWAPI::Colors::Green, false);
+			Broodwar->drawCircleMap(position.x, position.y, Const::MAX_RANGE, BWAPI::Colors::Green, false);
 			for (int x = ((position.x - weaponRange) / Const::WALK_TILE); x <= ((position.x + weaponRange) / Const::WALK_TILE); x++) {
 				for (int y = ((position.y - weaponRange) / Const::WALK_TILE); y <= ((position.y + weaponRange) / Const::WALK_TILE); y++) {
 					if ((Utility::distance(position.x, position.y, x * Const::WALK_TILE, y * Const::WALK_TILE)) <= weaponRange) {

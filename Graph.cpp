@@ -19,36 +19,6 @@ Graph::Graph(BWAPI::Game* g) {
 	lastStates = std::map<BWAPI::UnitType, double>();
 
 	initNodes();
-
-	/* Functions*/
-	//dangerFunctions[BWAPI::UnitTypes::Zerg_Hydralisk] = new ComputedDangerFunction(BWAPI::UnitTypes::Zerg_Hydralisk);
-
-	if (!Const::FA) {	// MLP
-		dangerFunctions[BWAPI::UnitTypes::Zerg_Mutalisk] = new ActualDangerFunction(
-			BWAPI::UnitTypes::Zerg_Mutalisk,
-			new MLP(1, 1, Const::NEURONS, Const::ALPHA, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Mutalisk.toString() + ".txt"));
-
-
-		dangerFunctions[BWAPI::UnitTypes::Zerg_Drone] = new ActualDangerFunction(
-			BWAPI::UnitTypes::Zerg_Drone,
-			new MLP(1, 1, Const::NEURONS, Const::ALPHA, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Drone.toString() + ".txt"));
-
-
-		dangerFunctions[BWAPI::UnitTypes::Zerg_Hydralisk] = new ActualDangerFunction(
-			BWAPI::UnitTypes::Zerg_Hydralisk,
-			new MLP(1, 1, Const::NEURONS, Const::ALPHA, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt"));
-	}
-
-	else {	// RBF
-		dangerFunctions[BWAPI::UnitTypes::Zerg_Hydralisk] = new ActualDangerFunction(
-			BWAPI::UnitTypes::Zerg_Hydralisk,
-			new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt", true));
-
-		/*dangerFunctions[BWAPI::UnitTypes::Zerg_Drone] = new ActualDangerFunction(
-			BWAPI::UnitTypes::Zerg_Drone,
-			new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Drone.toString() + ".txt", true));
-	*/
-	}	
 }
 
 Graph::~Graph() {
@@ -56,7 +26,7 @@ Graph::~Graph() {
 
 	// delete danger functions
 	for (std::map<BWAPI::UnitType, DangerFunction*>::iterator itr = dangerFunctions.begin(); itr != dangerFunctions.end(); ++itr) {
-		itr->second->visualize("Function_" + itr->second->getEnemyType().toString() + ".dat");
+		itr->second->visualize(std::to_string(Const::MODEL) + "_" + itr->second->getEnemyType().toString() + ".dat", false);
 		delete(itr->second);
 		dangerFunctions.erase(itr);
 	}
@@ -156,22 +126,32 @@ int Graph::getIndex(int w, int h) {
 //return new ComputatedDangerFunction if no function is found
 DangerFunction* Graph::getDangerFunction(BWAPI::UnitType unitType) {
 	if (dangerFunctions.find(unitType) == dangerFunctions.end()) {
-		dangerFunctions[unitType] = new ComputedDangerFunction(unitType);
+		switch (Const::MODEL) {
+			case 1:
+				dangerFunctions[unitType] = new ActualDangerFunction(unitType,
+					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt", true));
+				break;
+			case 2:
+				dangerFunctions[unitType] = new ActualDangerFunction(unitType, 
+					new MLP(1, 1, Const::NEURONS, Const::ALPHA, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Mutalisk.toString() + ".txt"));
+				break;
+			case 3:
+				break;
+			default:
+				dangerFunctions[unitType] = new ComputedDangerFunction(unitType);
+		}
+		dangerFunctions[unitType]->setUnitPtr(unit);
 	}
 	return dangerFunctions.at(unitType);
 }
 
-// set unit pointer to all danger functions
-void  Graph::setUnitPointer(BWAPI::UnitInterface* unit) {
-	for (std::map<BWAPI::UnitType, DangerFunction*>::iterator itr = dangerFunctions.begin(); itr != dangerFunctions.end(); ++itr) {
-		itr->second->setUnitPtr(unit);
-	}
+void  Graph::setUnitPointer(BWAPI::UnitInterface* u) {
+	unit = u;
 }
 
 // update e(node, i) cost and return its value
-double Graph::getNodeCost(Node* node, int i, BWAPI::UnitInterface* unit, double weight) {
+double Graph::getNodeCost(Node* node, int i, double weight) {
 	double danger = 0;
-	//double max = unit->getType().maxHitPoints() + unit->getType().maxShields();
 	if (!node->isUpdated(i)) {
 		Node* n = node->getNeighbour(i);
 		BWAPI::Unitset units = Broodwar->getUnitsInRadius(n->getX() * Const::WALK_TILE, n->getY() * Const::WALK_TILE, (int) Const::MAX_RANGE);
@@ -185,13 +165,13 @@ double Graph::getNodeCost(Node* node, int i, BWAPI::UnitInterface* unit, double 
 		}
 		//Broodwar->sendText("update %d", (int) danger);
 		if (danger < 0) danger = 0;
-		node->setDangerCost(i, danger * Const::MAX_RANGE);
+		node->setDangerCost(i, danger);
 	}
 	//Utility::printToFile(Const::PATH_DEBUG, std::to_string(node->getTerrainCost(i)) + (string)" " + std::to_string(node->getDangerCost(i)));
 	return node->getCost(i, weight);
 }
 
-void Graph::updateDangerFunctions(BWAPI::UnitInterface* unit) {
+void Graph::updateDangerFunctions() {
 	//learn for old states
 	for (std::map<BWAPI::UnitType, double>::iterator iterator = lastStates.begin(); iterator != lastStates.end(); iterator++) {
 		getDangerFunction(iterator->first)->learn(iterator->second);
@@ -211,7 +191,7 @@ void Graph::updateDangerFunctions(BWAPI::UnitInterface* unit) {
 }
 
 // disable Nodes under all units
-void Graph::updateUnits(BWAPI::UnitInterface* unit) {
+void Graph::updateUnits() {
 	BWAPI::Unitset units = Broodwar->getAllUnits();
 	for (auto u = units.begin(); u != units.end(); ++u) {
 		if ((*u) == unit) continue;
@@ -237,14 +217,14 @@ std::vector<BWAPI::Position> Graph::getPath(Node* current) {
 	return result;
 }
 
-std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, BWAPI::UnitInterface* unit, double weight) {
+std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, double weight) {
 	std::pair<int, int> start = std::pair<int, int>(Utility::PositionToWalkPosition(s.x), Utility::PositionToWalkPosition(s.y));
 	std::pair<int, int> end = std::pair<int, int>(Utility::PositionToWalkPosition(e.x), Utility::PositionToWalkPosition(e.y));
 
 	int sindex = start.second * width + start.first;
 	Node* snode = map[sindex];
 
-	updateUnits(unit);
+	updateUnits();
 
 	// check if exists a path
 	if (!terrain->isReachable(start.first, start.second, end.first, end.second)) {
@@ -275,7 +255,7 @@ std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, 
 			Node* neighbour = current->getNeighbour(i);
 			if (neighbour == NULL) continue;
 
-			double g_score = current->g + getNodeCost(current, i, unit, weight);
+			double g_score = current->g + getNodeCost(current, i, weight);
 
 			if (g_score < neighbour->g) {
 				neighbour->prev = current;

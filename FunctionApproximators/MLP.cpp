@@ -30,8 +30,8 @@ MLP::MLP(int i, int o, int h, double a, string f) : FunctionApproximator(i, o, a
 		w = new Matrix(neurons, inputs + 1);
 		v = new Matrix(outputs, neurons + 1);
 
-		w->random(inputs);
-		v->random(neurons);
+		//w->random(inputs);
+		//v->random(neurons);
 	}
 }
 

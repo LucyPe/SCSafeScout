@@ -5,15 +5,15 @@ namespace Const {
 	const double DANGER_WEIGTH = 1; // interval <0,1>
 
 	/* Learning params*/
-	const bool LEARNING = 1;
 	const int LEARNING_FRAME_RATE = 1;
-
-	const bool NO_GUI = 0;
+	const int MODEL = 1;
 
 	/* MAP variables */
 	const int WALK_TILE = 8;
 	const int BUILD_TILE = 32;
 	const double MAX_RANGE = 8 * BUILD_TILE; // 256
+
+	const int PATH_UPDATE_FRAME_RATE = 8;
 
 	/* Neural Networks variables */
 	const bool FA = 1; //MLP or RBF xx

@@ -28,12 +28,11 @@ void ActualDangerFunction::learn(double dist) {
 		double actualHp = (unitPtr->getHitPoints() + unitPtr->getShields());
 		vector<double> input = createInput(dist);
 		vector<double> output = FA->compute(input);
-		vector<double> target = vector<double>(1, ((hp - actualHp) / maxHp));
+		vector<double> target = vector<double>(1, ((hp - actualHp)/* / maxHp*/));
 				
 		if (FA->error(target, output)[0] != 0) {
 			FA->adjust(input, output, target);
-			//Utility::printToFile(Const::PATH_DEBUG, std::to_string(hp - actualHp) + " " + std::to_string(maxHp));
-			DangerFunction::visualize("AD.txt");
+			DangerFunction::visualize(std::to_string(Const::MODEL) + "_" + "Zerg_Hydralisk" + ".dat", false);
 		}
 
 		hp = actualHp;
@@ -45,5 +44,5 @@ void ActualDangerFunction::learn(double dist) {
 
 double ActualDangerFunction::compute(double dist) {
 	double result = FA->compute(createInput(dist)).at(0);
-	return result;
+	return (result /** Const::MAX_RANGE*/);
 }
