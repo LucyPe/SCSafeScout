@@ -44,5 +44,5 @@ void ActualDangerFunction::learn(double dist) {
 
 double ActualDangerFunction::compute(double dist) {
 	double result = FA->compute(createInput(dist)).at(0);
-	return (result /** Const::MAX_RANGE*/);
+	return result;
 }

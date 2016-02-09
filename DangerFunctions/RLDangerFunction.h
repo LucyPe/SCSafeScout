@@ -7,11 +7,17 @@ class RLDangerFunction : public DangerFunction {
 private: 
 	FunctionApproximator* FA;
 
+	double hp;
+	double maxHp;
+	vector<double> createInput(double);
+
 public:
 	RLDangerFunction(BWAPI::UnitType, FunctionApproximator*);
 	~RLDangerFunction();
 
-	double compute(double dist, bool isAir);
-	//void saveToFile(std::string file);
+	void setUnitPtr(BWAPI::UnitInterface*);
+
+	double compute(double dist);
+	void learn(double);
 };
 

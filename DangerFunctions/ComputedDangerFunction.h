@@ -5,7 +5,6 @@ class ComputedDangerFunction : public DangerFunction {
 
 private: 
 	BWAPI::WeaponType unitWeapons[2];
-
 	static double dmgTable[3][3];
 
 	double dmgFactor(int);

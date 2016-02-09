@@ -9,7 +9,6 @@ double ComputedDangerFunction::dmgTable[3][3] = {
 	{ 0.75, 1.0, 1.0 }
 };
 
-
 ComputedDangerFunction::ComputedDangerFunction(BWAPI::UnitType enemy) : DangerFunction(enemy) {
 	unitWeapons[0] = enemy.groundWeapon();
 	unitWeapons[1] = enemy.airWeapon();

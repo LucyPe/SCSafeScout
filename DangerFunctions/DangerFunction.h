@@ -20,7 +20,6 @@ public:
 
 	virtual double compute(double dist) { return 0; };
 	virtual void learn(double dist) {};
-	virtual void setToZero() {};
 	void visualize(string, bool);
 };
 

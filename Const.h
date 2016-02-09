@@ -6,7 +6,7 @@ namespace Const {
 
 	/* Learning params*/
 	const int LEARNING_FRAME_RATE = 1;
-	const int MODEL = 1;
+	const int MODEL = 3;
 
 	/* MAP variables */
 	const int WALK_TILE = 8;
@@ -21,7 +21,8 @@ namespace Const {
 	const int NEURONS = 5;
 	const int CENTERS = 20;
 
-	const double ALPHA = 0.02;
+	const double ALPHA = 0.1;
+	const double GAMMA = 0.02;
 	const double SIGMA = (MAX_RANGE / CENTERS) / MAX_RANGE;
 	const double RADIUS = (MAX_RANGE / CENTERS) / MAX_RANGE;
 

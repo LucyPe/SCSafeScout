@@ -3,6 +3,7 @@
 #include "Const.h"
 #include "DangerFunctions/ComputedDangerFunction.h"
 #include "DangerFunctions/ActualDangerFunction.h"
+#include "DangerFunctions/RLDangerFunction.h"
 #include "FunctionApproximators/FunctionApproximator.h"
 #include "FunctionApproximators/MLP.h"
 #include "FunctionApproximators/RBF.h"
@@ -136,6 +137,8 @@ DangerFunction* Graph::getDangerFunction(BWAPI::UnitType unitType) {
 					new MLP(1, 1, Const::NEURONS, Const::ALPHA, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Mutalisk.toString() + ".txt"));
 				break;
 			case 3:
+				dangerFunctions[unitType] = new RLDangerFunction(unitType,
+					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt", true));
 				break;
 			default:
 				dangerFunctions[unitType] = new ComputedDangerFunction(unitType);
