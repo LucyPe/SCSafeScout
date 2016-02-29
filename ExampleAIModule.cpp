@@ -86,7 +86,7 @@ void ExampleAIModule::onFrame() {
 		// move
 		if (pathfinder->MOVE) {
 			if (!pathfinder->moveUnit(position, frame)){
-				position = Utility::getTrainPosition(&side);
+				//position = Utility::getTrainPosition(&side);
 				pathfinder->changePosition(position);
 			}
 		}
@@ -221,6 +221,8 @@ DWORD WINAPI AnalyzeThread() {
 
 //other
 bool ExampleAIModule::ignoreUnit(BWAPI::Unit u) {
+	//if (!u->getType().isWorker()) return true;
+	//if (u->getType() != BWAPI::UnitTypes::Protoss_Dragoon) return true;
 	if (!u->exists()) return true;
 	if (u->isLockedDown() || u->isMaelstrommed() || u->isStasised()) return true;
 	if (u->isLoaded() || !u->isPowered() || u->isStuck()) return true;

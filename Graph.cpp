@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include "Graph.h"
 #include "Const.h"
 #include "DangerFunctions/ComputedDangerFunction.h"
@@ -10,6 +11,7 @@
 
 Graph::Graph(BWAPI::Game* g) {
 	Broodwar = g;
+	unit = NULL;
 	// mapHeight() and mapWidth() in build tiles
 	height = Broodwar->mapHeight() * 4 - 4;
 	width = Broodwar->mapWidth() * 4;
@@ -150,6 +152,7 @@ DangerFunction* Graph::getDangerFunction(BWAPI::UnitType unitType) {
 
 void  Graph::setUnitPointer(BWAPI::UnitInterface* u) {
 	unit = u;
+	unitType = unit->getType();
 }
 
 // update e(node, i) cost and return its value
@@ -197,17 +200,21 @@ void Graph::updateDangerFunctions() {
 void Graph::updateUnits() {
 	BWAPI::Unitset units = Broodwar->getAllUnits();
 	for (auto u = units.begin(); u != units.end(); ++u) {
-		if ((*u) == unit) continue;
-		for (int x = (*u)->getLeft() - Const::WALK_TILE; x <= (*u)->getRight() + Const::WALK_TILE; x++) {
-			for (int y = (*u)->getTop() - Const::WALK_TILE; y <= (*u)->getBottom() + Const::WALK_TILE; y++) {
+		if ((*u) == unit || ((*u)->isFlying() != unit->isFlying())) continue;
+		for (int x = (*u)->getLeft() - unitType.dimensionRight(); x < (*u)->getRight() + unitType.dimensionLeft(); x++) {
+			for (int y = (*u)->getTop() - unitType.dimensionDown(); y < (*u)->getBottom() + unitType.dimensionUp(); y++) {
 				int index = getIndex(Utility::PositionToWalkPosition(x), Utility::PositionToWalkPosition(y));
-				map[index]->setOccupied(true);
+				if (index >= 0 && index < map.size() && map[index] != NULL) {
+					map[index]->setOccupied(true);
+				}
+				else {
+					Utility::printToFile(Const::PATH_ERROR, "Graph::updateUnits - index =" + std::to_string(index));
+				}
 			}
 		}
 		
 	}
 }
-
 
 //A*
 std::vector<BWAPI::Position> Graph::getPath(Node* current) {
@@ -216,21 +223,25 @@ std::vector<BWAPI::Position> Graph::getPath(Node* current) {
 		result.push_back(BWAPI::Position(current->getX() * Const::WALK_TILE, current->getY() * Const::WALK_TILE));
 		current = current->prev;
 	}
-	resetNodes();
+	//resetNodes();
 	return result;
 }
 
 std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, double weight) {
+	resetNodes();
 	std::pair<int, int> start = std::pair<int, int>(Utility::PositionToWalkPosition(s.x), Utility::PositionToWalkPosition(s.y));
 	std::pair<int, int> end = std::pair<int, int>(Utility::PositionToWalkPosition(e.x), Utility::PositionToWalkPosition(e.y));
 
-	int sindex = start.second * width + start.first;
+	int sindex = getIndex(start.first, start.second);
+	int eindex = getIndex(end.first, end.second);
 	Node* snode = map[sindex];
 
 	updateUnits();
 
+	bool occupied = Broodwar->getUnitsInRadius(e, Const::WALK_TILE).size() > 0;
+
 	// check if exists a path
-	if (!terrain->isReachable(start.first, start.second, end.first, end.second)) {
+	if ((map[eindex] == NULL) || occupied || !terrain->isReachable(start.first, start.second, end.first, end.second)) {
 		Broodwar->sendText("no path");
 		return getPath(snode);
 	}

@@ -2,11 +2,13 @@
 
 namespace Const {
 	
+	/* params: >> GRID >> PATH >> MOVE >> NO_GUI >> LEARNING >> dangerWeight	*/
+
 	const double DANGER_WEIGTH = 1; // interval <0,1>
 
 	/* Learning params*/
 	const int LEARNING_FRAME_RATE = 1;
-	const int MODEL = 3;
+	const int MODEL = 0;
 
 	/* MAP variables */
 	const int WALK_TILE = 8;
@@ -16,13 +18,11 @@ namespace Const {
 	const int PATH_UPDATE_FRAME_RATE = 8;
 
 	/* Neural Networks variables */
-	const bool FA = 1; //MLP or RBF xx
-
 	const int NEURONS = 5;
 	const int CENTERS = 20;
 
-	const double ALPHA = 0.1;
-	const double GAMMA = 0.02;
+	const double ALPHA = 0.02;
+	const double GAMMA = 0.08;
 	const double SIGMA = (MAX_RANGE / CENTERS) / MAX_RANGE;
 	const double RADIUS = (MAX_RANGE / CENTERS) / MAX_RANGE;
 

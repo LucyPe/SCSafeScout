@@ -23,6 +23,7 @@ bool Utility::PositionInRange(BWAPI::Position s, BWAPI::Position e, int range) {
 }
 
 int Utility::PositionToWalkPosition(int x) {
+	if (x <= 0) Utility::printToFile(Const::PATH_ERROR, "PositionToWalkPosition");
 	return (int)floor(((double)x / Const::WALK_TILE) + 0.5);
 }
 

@@ -60,6 +60,8 @@ bool SafePathFinder::findPath(BWAPI::Position start, BWAPI::Position end) {
 		for (int i = 0; (i < 5) && (i < path.size()); i++) {
 			path.pop_back();
 		}
+	} else {
+		Utility::printToFile(Const::PATH_ERROR, "SafePathFinder::findPath - no unit pointer");
 	}
 	return path.size() != 0;
 }
@@ -67,6 +69,8 @@ bool SafePathFinder::findPath(BWAPI::Position start, BWAPI::Position end) {
 void SafePathFinder::changePosition(BWAPI::Position position) {
 	if (unit != NULL) {
 		findPath(unit->getPosition(), position);
+	} else {
+		Utility::printToFile(Const::PATH_ERROR, "SafePathFinder::changePosition - no unit pointer");
 	}
 }
 
@@ -78,10 +82,10 @@ bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
 			unit->move(nextPosition());
 			if (Utility::PositionInRange(nextPosition(), unit->getPosition(), Const::WALK_TILE * 10)) {
 				path.pop_back();
-
+			
 				// update FA
 				if (LEARNING && (frame % Const::LEARNING_FRAME_RATE == 0)) map->updateDangerFunctions();
-
+				
 				// if enemy is near -> recalculate path
 				if (!enemies.empty() || (frame % Const::PATH_UPDATE_FRAME_RATE == 0))  {
 					findPath(unit->getPosition(), position);
@@ -97,6 +101,8 @@ bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
 				changePosition(Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight()));
 			}
 		}*/
+	} else {
+		Utility::printToFile(Const::PATH_ERROR, "SafePathFinder::moveUnit - no unit pointer");
 	}
 	return false;
 }
@@ -107,11 +113,16 @@ void SafePathFinder::showGrid() {
 	for (unsigned int i = 0; i < nodes.size(); i++) {
 		//if (map->terrain->isWalkable(nodes[i]->getX(), nodes[i]->getY())) {
 		if (nodes[i] != NULL) {
-			Broodwar->drawBoxMap(nodes[i]->getX() * Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE, nodes[i]->getX() * Const::WALK_TILE + Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE + Const::WALK_TILE, BWAPI::Color(255, 255, 255), false);
+			if (nodes[i]->isOccupied()) {
+				Broodwar->drawBoxMap(nodes[i]->getX() * Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE, nodes[i]->getX() * Const::WALK_TILE + Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE + Const::WALK_TILE, BWAPI::Color(0, 255, 0), false);
+			}
+			else {
+				Broodwar->drawBoxMap(nodes[i]->getX() * Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE, nodes[i]->getX() * Const::WALK_TILE + Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE + Const::WALK_TILE, BWAPI::Color(255, 255, 255), false);
+			}
 			for (unsigned int n = 0; n < 8; n++) {
 				//if (nodes[i]->getNeighbour(n) == NULL)
 				if (nodes[i]->getDangerCost(n) > 0)
-					Broodwar->drawCircleMap(nodes[i]->getX() * Const::WALK_TILE + n, nodes[i]->getY() * Const::WALK_TILE + 3, 1, BWAPI::Color(0, 255 - 200 * n, 10 * n), true);
+					Broodwar->drawCircleMap(nodes[i]->getX() * Const::WALK_TILE + n, nodes[i]->getY() * Const::WALK_TILE + 3, 1, BWAPI::Color(0, 255, 0) /*BWAPI::Color(0, 255 - 200 * n, 10 * n)*/, true);
 			}
 		}
 		/*else {

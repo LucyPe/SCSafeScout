@@ -11,6 +11,7 @@ private:
 	BWAPI::Game* Broodwar;
 	Terrain* terrain;
 	BWAPI::UnitInterface* unit;
+	BWAPI::UnitType unitType;
 
 	std::map<BWAPI::UnitType, DangerFunction*> dangerFunctions;
 	std::vector<Node*> map; // positions in walktiles
@@ -38,6 +39,7 @@ private:
 	std::vector<BWAPI::Position> getPath(Node*);
 
 	void updateUnits();
+	void setSuitable(Node*);
 
 public:
 	Graph(BWAPI::Game*);
