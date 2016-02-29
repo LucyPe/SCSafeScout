@@ -69,13 +69,7 @@ void Graph::deleteNodes() {
 
 void Graph::resetNodes() {
 	for (unsigned int i = 0; i < map.size(); i++) {
-		if (map[i] != NULL) {
-			map[i]->f = 0;
-			map[i]->g = INT_MAX;
-			map[i]->prev = NULL;
-			map[i]->resetDangerCost();
-			map[i]->setOccupied(false);
-		}
+		if (map[i] != NULL) map[i]->resetNode();
 	}
 	open_pos = std::map<std::pair<int, int>, Node*>();
 	open_f = std::multimap<double, Node*>();
@@ -126,7 +120,6 @@ int Graph::getIndex(int w, int h) {
 	return (h * width + w);
 }
 
-//return new ComputatedDangerFunction if no function is found
 DangerFunction* Graph::getDangerFunction(BWAPI::UnitType unitType) {
 	if (dangerFunctions.find(unitType) == dangerFunctions.end()) {
 		switch (Const::MODEL) {
@@ -200,19 +193,18 @@ void Graph::updateDangerFunctions() {
 void Graph::updateUnits() {
 	BWAPI::Unitset units = Broodwar->getAllUnits();
 	for (auto u = units.begin(); u != units.end(); ++u) {
+
 		if ((*u) == unit || ((*u)->isFlying() != unit->isFlying())) continue;
+
 		for (int x = (*u)->getLeft() - unitType.dimensionRight(); x < (*u)->getRight() + unitType.dimensionLeft(); x++) {
 			for (int y = (*u)->getTop() - unitType.dimensionDown(); y < (*u)->getBottom() + unitType.dimensionUp(); y++) {
 				int index = getIndex(Utility::PositionToWalkPosition(x), Utility::PositionToWalkPosition(y));
+				
 				if (index >= 0 && index < map.size() && map[index] != NULL) {
 					map[index]->setOccupied(true);
 				}
-				else {
-					Utility::printToFile(Const::PATH_ERROR, "Graph::updateUnits - index =" + std::to_string(index));
-				}
 			}
 		}
-		
 	}
 }
 
@@ -223,30 +215,27 @@ std::vector<BWAPI::Position> Graph::getPath(Node* current) {
 		result.push_back(BWAPI::Position(current->getX() * Const::WALK_TILE, current->getY() * Const::WALK_TILE));
 		current = current->prev;
 	}
-	//resetNodes();
 	return result;
 }
 
 std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, double weight) {
 	resetNodes();
+	updateUnits();
+
 	std::pair<int, int> start = std::pair<int, int>(Utility::PositionToWalkPosition(s.x), Utility::PositionToWalkPosition(s.y));
 	std::pair<int, int> end = std::pair<int, int>(Utility::PositionToWalkPosition(e.x), Utility::PositionToWalkPosition(e.y));
 
-	int sindex = getIndex(start.first, start.second);
-	int eindex = getIndex(end.first, end.second);
-	Node* snode = map[sindex];
-
-	updateUnits();
-
-	bool occupied = Broodwar->getUnitsInRadius(e, Const::WALK_TILE).size() > 0;
-
+	 
 	// check if exists a path
-	if ((map[eindex] == NULL) || occupied || !terrain->isReachable(start.first, start.second, end.first, end.second)) {
+	if ((map[getIndex(end.first, end.second)] == NULL) // is walkable
+		|| (Broodwar->getUnitsInRadius(e, Const::WALK_TILE).size() > 0) // is not occupied 
+		|| !terrain->isReachable(start.first, start.second, end.first, end.second)) { // is reachable
 		Broodwar->sendText("no path");
-		return getPath(snode);
+		return std::vector<BWAPI::Position>();
 	}
 
 	// init start node
+	Node* snode = map[getIndex(start.first, start.second)];
 	snode->g = 0;
 	snode->f = Utility::distance(start, end);
 	open_f.insert(std::pair<double, Node*>(snode->f, snode));

@@ -19,6 +19,8 @@ public:
 	Node(std::pair<int, int>);
 	~Node();
 
+	void resetNode();
+
 	std::pair<int, int> getPosition();
 	int getX();
 	int getY();
@@ -33,8 +35,6 @@ public:
 	double getCost(int, double);
 	double getTerrainCost(int);
 	double getDangerCost(int);
-	void resetDangerCost();
-
 
 	void setTerrainCost(int, double);
 	void setDangerCost(int, double);

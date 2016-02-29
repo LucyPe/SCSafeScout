@@ -13,10 +13,10 @@ private:
 
 	std::vector<BWTA::Polygon> unwalkablePolygons;
 	std::vector<BWTA::Polygon> regionsPolygons;
-
-	void setWalkabilityData();
+	
 	bool readTerrainData();
-
+	void saveTerrainData();
+	
 public:
 	Terrain(BWAPI::Game*, int, int);
 	~Terrain();

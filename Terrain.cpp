@@ -18,7 +18,7 @@ Terrain::Terrain(BWAPI::Game* game, int w, int h) {
 		for (std::set<BWTA::Region*>::const_iterator r = BWTA::getRegions().begin(); r != BWTA::getRegions().end(); r++) {
 			regionsPolygons.push_back((*r)->getPolygon());
 		}
-		setWalkabilityData();
+		saveTerrainData();
 	}
 }
 
@@ -26,9 +26,8 @@ bool Terrain::readTerrainData() {
 	std::ifstream file;
 	file.open("bwapi-data/BWTA/" + Broodwar->mapHash() + ".txt", std::ofstream::in);
 	if (file.is_open()) {
-
+		int input;
 		for (int i = 0; i < height * width; i++) {
-			int input;
 			file >> input;
 			walkability.push_back(input);
 		}
@@ -37,6 +36,20 @@ bool Terrain::readTerrainData() {
 		return true;
 	}
 	return false;
+}
+
+void Terrain::saveTerrainData() {
+	std::ofstream file;
+	file.open("bwapi-data/BWTA/" + Broodwar->mapHash() + ".txt", std::ofstream::out);
+	if (file.is_open()) {
+		for (int h = 0; h < height; h++) {
+			for (int w = 0; w < width; w++) {
+				if (isWalkable(w, h)) walkability.push_back(1);
+				else walkability.push_back(0);
+				file << walkability.at(walkability.size() - 1) << " ";
+			}
+		}
+	}
 }
 
 bool Terrain::pointInPolygon(int walk_x, int walk_y, BWTA::Polygon* polygon) {
@@ -61,34 +74,22 @@ bool Terrain::pointInPolygon(int walk_x, int walk_y, BWTA::Polygon* polygon) {
 	return false;
 }
 
-void Terrain::setWalkabilityData() {
-	std::ofstream file;
-	file.open("bwapi-data/BWTA/" + Broodwar->mapHash() + ".txt", std::ofstream::out);
-	if (file.is_open()) {
-		for (int h = 0; h < height; h++) {
-			for (int w = 0; w < width; w++) {
-				if (isWalkable(w, h)) walkability.push_back(1);
-				else walkability.push_back(0);
-				file << walkability.at(walkability.size() - 1) << " ";
-			}
-		}
-	}
+
+
+int Terrain::getWalkabilityData(int x, int y) {
+	return walkability[y * width + x];
 }
 
 bool Terrain::isWalkable(int x, int y) {
 	for (BWTA::Polygon pol : unwalkablePolygons) {
 		if (pointInPolygon(x, y, &pol)) {
 			for (BWTA::Polygon pol : regionsPolygons) {
-				if (pointInPolygon(x * 8, y * 8, &pol)) return true;
+				if (pointInPolygon(x * Const::WALK_TILE, y * Const::WALK_TILE, &pol)) return true;
 			}	
 			return false;
 		}
 	}
 	return true;
-}
-
-int Terrain::getWalkabilityData(int x, int y) {
-	return walkability[y * width + x];
 }
 
 bool Terrain::isReachable(int sx, int sy, int ex, int ey) {

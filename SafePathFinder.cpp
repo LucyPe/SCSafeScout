@@ -79,8 +79,9 @@ bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
 	if (unit != NULL) {
 		BWAPI::Unitset enemies = unit->getUnitsInRadius(Const::MAX_RANGE);
 		if (existPath()) {
+			BWAPI::Position unitPosition = unit->getPosition();
 			unit->move(nextPosition());
-			if (Utility::PositionInRange(nextPosition(), unit->getPosition(), Const::WALK_TILE * 10)) {
+			if (Utility::PositionInRange(nextPosition(), unitPosition, Const::WALK_TILE * 10)) {
 				path.pop_back();
 			
 				// update FA
@@ -88,7 +89,7 @@ bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
 				
 				// if enemy is near -> recalculate path
 				if (!enemies.empty() || (frame % Const::PATH_UPDATE_FRAME_RATE == 0))  {
-					findPath(unit->getPosition(), position);
+					findPath(unitPosition, position);
 				}
 			}			
 			/*if (Const::LEARNING && (path.size() <= 3)) {
@@ -97,7 +98,7 @@ bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
 			return true;			
 		}
 		/*else {
-			if (!findPath(unit->getPosition(), position)) {
+			if (!findPath(unitPosition, position)) {
 				changePosition(Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight()));
 			}
 		}*/

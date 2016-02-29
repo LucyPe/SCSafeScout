@@ -3,19 +3,24 @@
 
 Node::Node(std::pair<int, int> p) {
 	neighbours = std::vector<Node*>(8, NULL);
-	//disabled = std::vector<bool>(8, false);
 	occupied = false;
 
 	terrainCosts = std::vector<double>(8, INT_MAX);
-	resetDangerCost();
 
 	position = p;
-	f = 0;
-	g = INT_MAX;
-	prev = NULL;
+	resetNode();
 };
 
 Node::~Node() {}
+
+void Node::resetNode() {
+	f = 0;
+	g = INT_MAX;
+	prev = NULL;
+	dangerCosts = std::vector<double>(8, 0.0);
+	dangerUpdate = std::vector<bool>(8, false);
+	setOccupied(false);
+}
 
 //POSITION
 std::pair<int, int> Node::getPosition() {
@@ -75,8 +80,3 @@ void Node::setDangerCost(int i, double d) {
 	dangerCosts[i] = d;
 	dangerUpdate[i] = true;
 }
-
-void Node::resetDangerCost() {
-	dangerCosts = std::vector<double>(8, 0.0);
-	dangerUpdate = std::vector<bool>(8, false);
-};
