@@ -8,7 +8,7 @@ namespace Const {
 
 	/* Learning params*/
 	const int LEARNING_FRAME_RATE = 1;
-	const int MODEL = 0;
+	const int MODEL = 3;
 
 	/* MAP variables */
 	const int WALK_TILE = 8;

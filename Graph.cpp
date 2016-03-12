@@ -155,6 +155,9 @@ double Graph::getNodeCost(Node* node, int i, double weight) {
 		Node* n = node->getNeighbour(i);
 		BWAPI::Unitset units = Broodwar->getUnitsInRadius(n->getX() * Const::WALK_TILE, n->getY() * Const::WALK_TILE, (int) Const::MAX_RANGE);
 		// for each enemy compute danger for node
+
+		//if (units.size() == 0) Broodwar->sendText("NOPE");
+
 		for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
 			if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
 				BWAPI::Position pos = (*enemy)->getPosition();
@@ -192,6 +195,7 @@ void Graph::updateDangerFunctions() {
 // disable Nodes under all units
 void Graph::updateUnits() {
 	BWAPI::Unitset units = Broodwar->getAllUnits();
+
 	for (auto u = units.begin(); u != units.end(); ++u) {
 
 		if ((*u) == unit || ((*u)->isFlying() != unit->isFlying())) continue;

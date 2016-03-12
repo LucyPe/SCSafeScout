@@ -123,7 +123,7 @@ void SafePathFinder::showGrid() {
 			for (unsigned int n = 0; n < 8; n++) {
 				//if (nodes[i]->getNeighbour(n) == NULL)
 				if (nodes[i]->getDangerCost(n) > 0)
-					Broodwar->drawCircleMap(nodes[i]->getX() * Const::WALK_TILE + n, nodes[i]->getY() * Const::WALK_TILE + 3, 1, BWAPI::Color(0, 255, 0) /*BWAPI::Color(0, 255 - 200 * n, 10 * n)*/, true);
+					Broodwar->drawCircleMap(nodes[i]->getX() * Const::WALK_TILE + n, nodes[i]->getY() * Const::WALK_TILE + 3, 1, BWAPI::Color(nodes[i]->getDangerCost(n) * 100 / 250, nodes[i]->getDangerCost(n) * 100 / 250, nodes[i]->getDangerCost(n) * 100 / 250), true);
 			}
 		}
 		/*else {
