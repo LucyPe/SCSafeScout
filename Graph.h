@@ -33,13 +33,13 @@ private:
 	int getIndex(int, int);
 
 	DangerFunction* getDangerFunction(BWAPI::UnitType);
-	void updateDanger();
 	double getNodeCost(Node*, int, double);
 
 	std::vector<BWAPI::Position> getPath(Node*);
 
 	void updateUnits();
-	void setSuitable(Node*);
+	void updateDanger();
+	void updateNode();
 
 public:
 	Graph(BWAPI::Game*);

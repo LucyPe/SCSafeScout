@@ -151,8 +151,9 @@ void  Graph::setUnitPointer(BWAPI::UnitInterface* u) {
 // update e(node, i) cost and return its value
 double Graph::getNodeCost(Node* node, int i, double weight) {
 	double danger = 0;
-	if (!node->isUpdated(i)) {
-		Node* n = node->getNeighbour(i);
+	Node* n = node->getNeighbour(i);
+	if (!n->isUpdated()) {
+		
 		BWAPI::Unitset units = Broodwar->getUnitsInRadius(n->getX() * Const::WALK_TILE, n->getY() * Const::WALK_TILE, (int) Const::MAX_RANGE);
 		// for each enemy compute danger for node
 
@@ -167,16 +168,22 @@ double Graph::getNodeCost(Node* node, int i, double weight) {
 		}
 		//Broodwar->sendText("update %d", (int) danger);
 		if (danger < 0) danger = 0;
-		node->setDangerCost(i, danger);
+		n->setDangerCost(danger);
 	}
 	//Utility::printToFile(Const::PATH_DEBUG, std::to_string(node->getTerrainCost(i)) + (string)" " + std::to_string(node->getDangerCost(i)));
 	return node->getCost(i, weight);
+}
+
+void updateNode() {
+
 }
 
 void Graph::updateDangerFunctions() {
 	//learn for old states
 	for (std::map<BWAPI::UnitType, double>::iterator iterator = lastStates.begin(); iterator != lastStates.end(); iterator++) {
 		getDangerFunction(iterator->first)->learn(iterator->second);
+		Broodwar->drawTextScreen(10, 80, "last: %f", iterator->second);
+
 	}
 
 	//add new states
@@ -187,6 +194,7 @@ void Graph::updateDangerFunctions() {
 			BWAPI::Position pos = (*enemy)->getPosition();
 			double dist = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
 			newStates[(*enemy)->getType()] = dist;
+			Broodwar->drawTextScreen(10, 100, "new: %f", dist);
 		}
 	}
 	lastStates = newStates;
@@ -212,6 +220,38 @@ void Graph::updateUnits() {
 	}
 }
 
+// update all nodes with danger
+void Graph::updateDanger() {
+	BWAPI::Unitset units = Broodwar->getAllUnits();
+
+	for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
+
+		if (!(*enemy)->getPlayer()->isEnemy(Broodwar->self())) continue;
+
+		BWAPI::UnitType enemyType = (*enemy)->getType();
+		BWAPI::WeaponType weapon = unit->isFlying() ? enemyType.airWeapon() : enemyType.groundWeapon();
+
+		//if (units.size() > 0) Broodwar->printf("Enemy: %d", enemyType);
+
+		int x_end = min(width * TILE_SIZE, (*enemy)->getRight() + weapon.maxRange());
+		int y_end = min(height * TILE_SIZE, (*enemy)->getBottom() + weapon.maxRange());
+
+		Broodwar->printf("End: %d %d", x_end, y_end);
+
+		for (int x = max(0, (*enemy)->getLeft() - weapon.maxRange()); x < x_end; x++) {
+			for (int y = max(0, (*enemy)->getTop() - weapon.maxRange()); y < y_end; y++) {
+
+				int index = getIndex(Utility::PositionToWalkPosition(x), Utility::PositionToWalkPosition(y));
+
+				BWAPI::Position pos = (*enemy)->getPosition();
+				double dist = Utility::distance(x, y, pos.x, pos.y);
+				map[index]->setDangerCost(getDangerFunction(enemyType)->compute(dist));
+				
+			}
+		}
+	}
+}
+
 //A*
 std::vector<BWAPI::Position> Graph::getPath(Node* current) {
 	std::vector<BWAPI::Position> result = std::vector<BWAPI::Position>();
@@ -225,11 +265,11 @@ std::vector<BWAPI::Position> Graph::getPath(Node* current) {
 std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, double weight) {
 	resetNodes();
 	updateUnits();
+	//updateDanger();
 
 	std::pair<int, int> start = std::pair<int, int>(Utility::PositionToWalkPosition(s.x), Utility::PositionToWalkPosition(s.y));
 	std::pair<int, int> end = std::pair<int, int>(Utility::PositionToWalkPosition(e.x), Utility::PositionToWalkPosition(e.y));
-
-	 
+ 
 	// check if exists a path
 	if ((map[getIndex(end.first, end.second)] == NULL) // is walkable
 		|| (Broodwar->getUnitsInRadius(e, Const::WALK_TILE).size() > 0) // is not occupied 
@@ -265,6 +305,7 @@ std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, 
 			double g_score = current->g + getNodeCost(current, i, weight);
 
 			if (g_score < neighbour->g) {
+				//Utility::printToFile(Const::PATH_DEBUG, std::to_string(getNodeCost(current, i, weight)));
 				neighbour->prev = current;
 				neighbour->g = g_score;
 				double f_score = neighbour->g + Utility::distance(neighbour->getPosition(), end);

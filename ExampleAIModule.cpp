@@ -6,16 +6,13 @@
 
 using namespace BWAPI;
 
-/*
-bool analyzed = true;
-bool analysis_just_finished;*/
-
 int frame = 0;
 SafePathFinder* pathfinder;
 UnitInterface* scout;
 
 Position position;
 bool side = 1;
+int position_count = 0;
 
 void ExampleAIModule::onStart() {
 	//CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
@@ -25,13 +22,28 @@ void ExampleAIModule::onStart() {
 	pathfinder = new SafePathFinder(BroodwarPtr);
 
 	scout = NULL;
-	position = Utility::getTrainPosition(&side);
-
+	if (Const::MODE == 0) {
+		position = Utility::getTrainPosition(&side);
+	}
+	else {
+		position = BWAPI::Position(1090, 100);
+		position.makeValid();
+		pathfinder->LEARNING = false;
+	}
+	
 	Broodwar->sendText("%s", "Black sheep wall");
 
 	if (pathfinder->NO_GUI) {
 		Broodwar->setLocalSpeed(0);
 		Broodwar->setGUI(false);
+	}
+
+	std::ifstream file;
+	file.open(Const::PATH_DEBUG);
+
+	if (file.is_open()) {
+		file >> position_count;
+		file.close();
 	}
 
 	// BWAPI returns std::string when retrieving a string, don't forget to add .c_str() when printing!
@@ -43,6 +55,14 @@ void ExampleAIModule::onStart() {
 }
 
 void ExampleAIModule::onEnd(bool isWinner) {
+	std::ofstream file;
+	file.open(Const::PATH_DEBUG);
+
+	if (file.is_open()) {
+		file << position_count;
+		file.close();
+	}
+
 	delete(pathfinder);
 	BWTA::cleanMemory();
 }
@@ -54,6 +74,9 @@ void ExampleAIModule::onFrame() {
 	// Display the game frame rate as text in the upper left area of the screen
 	Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
 	Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
+	Broodwar->drawTextScreen(200, 40, "Position %d", position_count);
+	Broodwar->drawTextScreen(200, 60, "Frame %d", Broodwar->getFrameCount());
+	Broodwar->drawTextScreen(200, 80, "Path %d", pathfinder->pathLenght());
 
 	Broodwar->drawTextScreen(10, 0, "X: %d", Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x);
 	Broodwar->drawTextScreen(10, 20, "Y: %d", Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
@@ -85,8 +108,20 @@ void ExampleAIModule::onFrame() {
 		// move
 		if (pathfinder->MOVE) {
 			if (!pathfinder->moveUnit(position, frame)){
-				position = Utility::getTrainPosition(&side);
-				pathfinder->changePosition(position);
+				if (Const::MODE == 0) {
+					position = Utility::getTrainPosition(&side);
+					pathfinder->changePosition(position);
+					position_count++;
+
+					/*if (position_count % 10 == 0) {
+					Utility::printToFile(Const::PATH_DEBUG, std::to_string(position_count));
+					}*/
+					//if (position_count == 1000) Broodwar->pauseGame();
+				}
+				else {
+
+				}
+				
 			}
 		}
 	}
@@ -220,7 +255,7 @@ DWORD WINAPI AnalyzeThread() {
 
 //other
 bool ExampleAIModule::ignoreUnit(BWAPI::Unit u) {
-	//if (!u->getType().isWorker()) return true;
+	if (!u->getType().isWorker()) return true;
 	//if (u->getType() != BWAPI::UnitTypes::Protoss_Dragoon) return true;
 	if (!u->exists()) return true;
 	if (u->isLockedDown() || u->isMaelstrommed() || u->isStasised()) return true;

@@ -22,8 +22,9 @@ public:
 	SafePathFinder(BWAPI::Game*);
 	~SafePathFinder();
 
+	/* params */
 	double dangerWeight = -1;
-
+	
 	/* Gui Params */
 	bool GRID = false;
 	bool PATH = true;
@@ -37,6 +38,7 @@ public:
 
 	void setUnit(BWAPI::UnitInterface*, double);
 
+	int pathLenght();
 	void changePosition(BWAPI::Position);
 	bool moveUnit(BWAPI::Position, int);
 

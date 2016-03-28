@@ -11,9 +11,13 @@ private:
 
 	std::vector<Node*> neighbours;
 
+
 	std::vector<double> terrainCosts;
-	std::vector<double> dangerCosts;
-	std::vector<bool> dangerUpdate;
+	double dangerCost;
+	bool dangerUpdate;
+
+	//std::vector<double> dangerCosts;
+	//std::vector<bool> dangerUpdate;
 
 public:
 	Node(std::pair<int, int>);
@@ -25,7 +29,7 @@ public:
 	int getX();
 	int getY();
 
-	bool isUpdated(int);
+	bool isUpdated();
 	bool isOccupied();
 	void setOccupied(bool);
 
@@ -34,10 +38,10 @@ public:
 
 	double getCost(int, double);
 	double getTerrainCost(int);
-	double getDangerCost(int);
+	double getDangerCost();
 
 	void setTerrainCost(int, double);
-	void setDangerCost(int, double);
+	void setDangerCost(double);
 
 	/* AStar vars */
 	double f;

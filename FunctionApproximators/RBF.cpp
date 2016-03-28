@@ -56,8 +56,6 @@ void RBF::init_fixed(double start, double radius) {
 			w->set(j, i, start + radius * i);
 		}
 	}
-	Utility::printToFile("bwapi-data/write/gg.txt", w->toString());
-	Utility::printToFile("bwapi-data/write/gg.txt", v->toString());
 }
 
 /*

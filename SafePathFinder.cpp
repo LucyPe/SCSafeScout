@@ -21,6 +21,7 @@ void SafePathFinder::loadParams(){
 
 	if (file.is_open()) {
 		file >> GRID >> PATH >> MOVE >> NO_GUI >> LEARNING;
+	//	file >> Const::MODEL;
 		file >> dangerWeight;
 		file.close();
 	}
@@ -32,6 +33,7 @@ void SafePathFinder::saveParams(){
 
 	if (file.is_open()) {
 		file << GRID << " " << PATH << " " << MOVE << " " << NO_GUI << " " << LEARNING << endl;
+		//file << Const::MODEL << endl;
 		file << dangerWeight << endl;
 		file.close();
 	}
@@ -46,6 +48,10 @@ void SafePathFinder::setUnit(BWAPI::UnitInterface* u, double w) {
 
 bool SafePathFinder::existPath() {
 	return path.size() != 0;
+}
+
+int SafePathFinder::pathLenght() {
+	return path.size();
 }
 
 BWAPI::Position SafePathFinder::nextPosition() {
@@ -120,11 +126,7 @@ void SafePathFinder::showGrid() {
 			else {
 				Broodwar->drawBoxMap(nodes[i]->getX() * Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE, nodes[i]->getX() * Const::WALK_TILE + Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE + Const::WALK_TILE, BWAPI::Color(255, 255, 255), false);
 			}
-			for (unsigned int n = 0; n < 8; n++) {
-				//if (nodes[i]->getNeighbour(n) == NULL)
-				if (nodes[i]->getDangerCost(n) > 0)
-					Broodwar->drawCircleMap(nodes[i]->getX() * Const::WALK_TILE + n, nodes[i]->getY() * Const::WALK_TILE + 3, 1, BWAPI::Color(nodes[i]->getDangerCost(n) * 100 / 250, nodes[i]->getDangerCost(n) * 100 / 250, nodes[i]->getDangerCost(n) * 100 / 250), true);
-			}
+			if (nodes[i]->getDangerCost() > 0) Broodwar->drawCircleMap(nodes[i]->getX() * Const::WALK_TILE + 4, nodes[i]->getY() * Const::WALK_TILE + 4, 3, BWAPI::Color(nodes[i]->getDangerCost() * 100 / 250, nodes[i]->getDangerCost() * 100 / 250, nodes[i]->getDangerCost() * 100 / 250), true);
 		}
 		/*else {
 			if (!Broodwar->isWalkable(nodes[i]->getX(), nodes[i]->getY())) 
@@ -157,7 +159,8 @@ void SafePathFinder::drawEnemiesAttackRange() {
 
 			BWAPI::Position position = (*enemy)->getPosition();
 			Broodwar->drawCircleMap(position.x, position.y, weaponRange, BWAPI::Colors::Green, false);
-			Broodwar->drawCircleMap(position.x, position.y, Const::MAX_RANGE, BWAPI::Colors::Green, false);
+			Broodwar->drawCircleMap(position.x, position.y, (*enemy)->getType().seekRange(), BWAPI::Colors::Purple, false);
+			Broodwar->drawCircleMap(position.x, position.y, Const::MAX_RANGE, BWAPI::Colors::Blue, false);
 			for (int x = ((position.x - weaponRange) / Const::WALK_TILE); x <= ((position.x + weaponRange) / Const::WALK_TILE); x++) {
 				for (int y = ((position.y - weaponRange) / Const::WALK_TILE); y <= ((position.y + weaponRange) / Const::WALK_TILE); y++) {
 					if ((Utility::distance(position.x, position.y, x * Const::WALK_TILE, y * Const::WALK_TILE)) <= weaponRange) {
