@@ -128,10 +128,6 @@ DangerFunction* Graph::getDangerFunction(BWAPI::UnitType unitType) {
 					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt", true));
 				break;
 			case 2:
-				dangerFunctions[unitType] = new ActualDangerFunction(unitType, 
-					new MLP(1, 1, Const::NEURONS, Const::ALPHA, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Mutalisk.toString() + ".txt"));
-				break;
-			case 3:
 				dangerFunctions[unitType] = new RLDangerFunction(unitType,
 					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt", true));
 				break;
@@ -152,7 +148,7 @@ void  Graph::setUnitPointer(BWAPI::UnitInterface* u) {
 double Graph::getNodeCost(Node* node, int i, double weight) {
 	double danger = 0;
 	Node* n = node->getNeighbour(i);
-	if (!n->isUpdated()) {
+	/*if (!n->isUpdated()) {
 		
 		BWAPI::Unitset units = Broodwar->getUnitsInRadius(n->getX() * Const::WALK_TILE, n->getY() * Const::WALK_TILE, (int) Const::MAX_RANGE);
 		// for each enemy compute danger for node
@@ -169,13 +165,9 @@ double Graph::getNodeCost(Node* node, int i, double weight) {
 		//Broodwar->sendText("update %d", (int) danger);
 		if (danger < 0) danger = 0;
 		n->setDangerCost(danger);
-	}
+	}*/
 	//Utility::printToFile(Const::PATH_DEBUG, std::to_string(node->getTerrainCost(i)) + (string)" " + std::to_string(node->getDangerCost(i)));
 	return node->getCost(i, weight);
-}
-
-void updateNode() {
-
 }
 
 void Graph::updateDangerFunctions() {
@@ -224,29 +216,38 @@ void Graph::updateUnits() {
 void Graph::updateDanger() {
 	BWAPI::Unitset units = Broodwar->getAllUnits();
 
+	int max_range = Utility::PositionToWalkPosition((int)Const::MAX_RANGE);
+	Broodwar->printf("m %d", max_range);
+
 	for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
 
 		if (!(*enemy)->getPlayer()->isEnemy(Broodwar->self())) continue;
 
+		
 		BWAPI::UnitType enemyType = (*enemy)->getType();
-		BWAPI::WeaponType weapon = unit->isFlying() ? enemyType.airWeapon() : enemyType.groundWeapon();
+		BWAPI::Position position = (*enemy)->getPosition();
 
-		//if (units.size() > 0) Broodwar->printf("Enemy: %d", enemyType);
+		int pos_x = Utility::PositionToWalkPosition(position.x);
+		int pos_y = Utility::PositionToWalkPosition(position.y);
+		
+		int pos_x_start = max(0, pos_x - max_range);
+		int pos_y_start = max(0, pos_y - max_range);
+		int pos_x_end = min(width - 1, pos_x + max_range + 1);
+		int pos_y_end = min(height - 1, pos_y + max_range + 1);
 
-		int x_end = min(width * TILE_SIZE, (*enemy)->getRight() + weapon.maxRange());
-		int y_end = min(height * TILE_SIZE, (*enemy)->getBottom() + weapon.maxRange());
+		Broodwar->printf("e: %d", enemyType);
+		Broodwar->printf("%d %d %d %d", pos_x, pos_y, pos_x * Const::WALK_TILE, pos_y * Const::WALK_TILE);
+		Broodwar->printf("%d %d %d %d", pos_x_start * Const::WALK_TILE, pos_y_start * Const::WALK_TILE, 
+			pos_x_end * Const::WALK_TILE, pos_y_end * Const::WALK_TILE);
 
-		Broodwar->printf("End: %d %d", x_end, y_end);
-
-		for (int x = max(0, (*enemy)->getLeft() - weapon.maxRange()); x < x_end; x++) {
-			for (int y = max(0, (*enemy)->getTop() - weapon.maxRange()); y < y_end; y++) {
-
-				int index = getIndex(Utility::PositionToWalkPosition(x), Utility::PositionToWalkPosition(y));
-
-				BWAPI::Position pos = (*enemy)->getPosition();
-				double dist = Utility::distance(x, y, pos.x, pos.y);
-				map[index]->setDangerCost(getDangerFunction(enemyType)->compute(dist));
-				
+		// in walktiles
+		for (int x = pos_x_start; x < pos_x_end; x++) {
+			for (int y = pos_y_start; y < pos_y_end; y++) {
+				int index = getIndex(x, y);
+				if (map[index] != NULL) {
+					double dist = Utility::distance(x, y, pos_x, pos_y) * Const::WALK_TILE;
+					map[getIndex(x, y)]->setDangerCost(max(0.0, getDangerFunction(enemyType)->compute(dist)));
+				}
 			}
 		}
 	}
@@ -265,7 +266,7 @@ std::vector<BWAPI::Position> Graph::getPath(Node* current) {
 std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, double weight) {
 	resetNodes();
 	updateUnits();
-	//updateDanger();
+	updateDanger();
 
 	std::pair<int, int> start = std::pair<int, int>(Utility::PositionToWalkPosition(s.x), Utility::PositionToWalkPosition(s.y));
 	std::pair<int, int> end = std::pair<int, int>(Utility::PositionToWalkPosition(e.x), Utility::PositionToWalkPosition(e.y));

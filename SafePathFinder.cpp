@@ -84,8 +84,8 @@ void SafePathFinder::changePosition(BWAPI::Position position) {
 bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
 	if (unit != NULL) {
 		BWAPI::Unitset enemies = unit->getUnitsInRadius(Const::MAX_RANGE);
-		if (existPath()) {
-			BWAPI::Position unitPosition = unit->getPosition();
+		BWAPI::Position unitPosition = unit->getPosition();
+		if (existPath()) {			
 			unit->move(nextPosition());
 			if (Utility::PositionInRange(nextPosition(), unitPosition, Const::WALK_TILE * 10)) {
 				path.pop_back();
@@ -103,11 +103,10 @@ bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
 			}*/
 			return true;			
 		}
-		/*else {
-			if (!findPath(unitPosition, position)) {
-				changePosition(Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight()));
-			}
-		}*/
+		else {
+			findPath(unitPosition, position);
+		}
+		
 	} else {
 		Utility::printToFile(Const::PATH_ERROR, "SafePathFinder::moveUnit - no unit pointer");
 	}
