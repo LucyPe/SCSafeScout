@@ -6,7 +6,7 @@
 
 DWORD WINAPI AnalyzeThread();
 
-class ExampleAIModule : public BWAPI::AIModule
+class SCSafeScout : public BWAPI::AIModule
 {
 public:
   // Virtual functions for callbacks, leave these as they are.

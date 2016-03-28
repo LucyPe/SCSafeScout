@@ -1,4 +1,4 @@
-#include "ExampleAIModule.h"
+#include "SCSafeScout.h"
 #include "SafePathFinder.h"
 #include <BWTA.h>
 #include "Utility.h"
@@ -14,7 +14,7 @@ Position position;
 bool side = 1;
 int position_count = 0;
 
-void ExampleAIModule::onStart() {
+void SCSafeScout::onStart() {
 	//CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
 	BWTA::analyze();
 	BWTA::readMap();
@@ -54,7 +54,7 @@ void ExampleAIModule::onStart() {
 	Broodwar->enableFlag(Flag::UserInput);
 }
 
-void ExampleAIModule::onEnd(bool isWinner) {
+void SCSafeScout::onEnd(bool isWinner) {
 	std::ofstream file;
 	file.open(Const::PATH_DEBUG);
 
@@ -67,7 +67,7 @@ void ExampleAIModule::onEnd(bool isWinner) {
 	BWTA::cleanMemory();
 }
 
-void ExampleAIModule::onFrame() {
+void SCSafeScout::onFrame() {
 	if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self()) return;
 	//if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) return;
 
@@ -127,7 +127,7 @@ void ExampleAIModule::onFrame() {
 	}
 }
 
-void ExampleAIModule::onSendText(std::string text) {
+void SCSafeScout::onSendText(std::string text) {
 	// Make sure to use %s and pass the text as a parameter,
 	// otherwise you may run into problems when you use the %(percent) character!
 	/*if (text == "/analyze") {
@@ -175,15 +175,15 @@ void ExampleAIModule::onSendText(std::string text) {
 	}
 }
 
-void ExampleAIModule::onReceiveText(BWAPI::Player player, std::string text) {
+void SCSafeScout::onReceiveText(BWAPI::Player player, std::string text) {
   Broodwar << player->getName() << " said \"" << text << "\"" << std::endl;
 }
 
-void ExampleAIModule::onPlayerLeft(BWAPI::Player player) {
+void SCSafeScout::onPlayerLeft(BWAPI::Player player) {
   Broodwar->sendText("Goodbye %s!", player->getName().c_str());
 }
 
-void ExampleAIModule::onNukeDetect(BWAPI::Position target) {
+void SCSafeScout::onNukeDetect(BWAPI::Position target) {
   if ( target ) {
     Broodwar << "Nuclear Launch Detected at " << target << std::endl;
   }
@@ -193,19 +193,19 @@ void ExampleAIModule::onNukeDetect(BWAPI::Position target) {
   // You can also retrieve all the nuclear missile targets using Broodwar->getNukeDots()!
 }
 
-void ExampleAIModule::onUnitDiscover(BWAPI::Unit unit) {
+void SCSafeScout::onUnitDiscover(BWAPI::Unit unit) {
 }
 
-void ExampleAIModule::onUnitEvade(BWAPI::Unit unit) {
+void SCSafeScout::onUnitEvade(BWAPI::Unit unit) {
 }
 
-void ExampleAIModule::onUnitShow(BWAPI::Unit unit) {
+void SCSafeScout::onUnitShow(BWAPI::Unit unit) {
 }
 
-void ExampleAIModule::onUnitHide(BWAPI::Unit unit) {
+void SCSafeScout::onUnitHide(BWAPI::Unit unit) {
 }
 
-void ExampleAIModule::onUnitCreate(BWAPI::Unit unit) {
+void SCSafeScout::onUnitCreate(BWAPI::Unit unit) {
   if ( Broodwar->isReplay() ) {
     // if we are in a replay, then we will print out the build order of the structures
     if ( unit->getType().isBuilding() && !unit->getPlayer()->isNeutral() ) {
@@ -217,11 +217,11 @@ void ExampleAIModule::onUnitCreate(BWAPI::Unit unit) {
   }
 }
 
-void ExampleAIModule::onUnitDestroy(BWAPI::Unit unit) {
+void SCSafeScout::onUnitDestroy(BWAPI::Unit unit) {
 	if (unit->getID() == scout->getID()) Broodwar->restartGame();
 }
 
-void ExampleAIModule::onUnitMorph(BWAPI::Unit unit) {
+void SCSafeScout::onUnitMorph(BWAPI::Unit unit) {
   if ( Broodwar->isReplay() ) {
     // if we are in a replay, then we will print out the build order of the structures
     if ( unit->getType().isBuilding() && !unit->getPlayer()->isNeutral() )
@@ -234,14 +234,14 @@ void ExampleAIModule::onUnitMorph(BWAPI::Unit unit) {
   }
 }
 
-void ExampleAIModule::onUnitRenegade(BWAPI::Unit unit) {
+void SCSafeScout::onUnitRenegade(BWAPI::Unit unit) {
 }
 
-void ExampleAIModule::onSaveGame(std::string gameName) {
+void SCSafeScout::onSaveGame(std::string gameName) {
   Broodwar << "The game was saved to \"" << gameName << "\"" << std::endl;
 }
 
-void ExampleAIModule::onUnitComplete(BWAPI::Unit unit) {
+void SCSafeScout::onUnitComplete(BWAPI::Unit unit) {
 }
 
 //BWTA
@@ -254,7 +254,7 @@ DWORD WINAPI AnalyzeThread() {
 }*/
 
 //other
-bool ExampleAIModule::ignoreUnit(BWAPI::Unit u) {
+bool SCSafeScout::ignoreUnit(BWAPI::Unit u) {
 	if (Const::MODE == 1 && !u->getType().isWorker()) return true;
 	//if (u->getType() != BWAPI::UnitTypes::Protoss_Dragoon) return true;
 	if (!u->exists()) return true;
@@ -264,12 +264,12 @@ bool ExampleAIModule::ignoreUnit(BWAPI::Unit u) {
 	return false;
 }
 
-bool ExampleAIModule::hasScout() {
+bool SCSafeScout::hasScout() {
 	if (scout != NULL) return true;
 	return false;
 }
 
-bool ExampleAIModule::setScout() {
+bool SCSafeScout::setScout() {
 	if (hasScout()) return true;
 	for (auto &u : Broodwar->self()->getUnits()) {
 		if (ignoreUnit(u)) continue;
