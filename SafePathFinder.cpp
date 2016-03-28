@@ -117,22 +117,18 @@ void SafePathFinder::showGrid() {
 	std::vector<Node*> nodes = map->getNodes();
 
 	for (unsigned int i = 0; i < nodes.size(); i++) {
-		//if (map->terrain->isWalkable(nodes[i]->getX(), nodes[i]->getY())) {
-		if (nodes[i] != NULL) {
-			if (nodes[i]->isOccupied()) {
-				Broodwar->drawBoxMap(nodes[i]->getX() * Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE, nodes[i]->getX() * Const::WALK_TILE + Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE + Const::WALK_TILE, BWAPI::Color(0, 255, 0), false);
-			}
-			else {
-				Broodwar->drawBoxMap(nodes[i]->getX() * Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE, nodes[i]->getX() * Const::WALK_TILE + Const::WALK_TILE, nodes[i]->getY() * Const::WALK_TILE + Const::WALK_TILE, BWAPI::Color(255, 255, 255), false);
-			}
-			if (nodes[i]->getDangerCost() > 0) Broodwar->drawCircleMap(nodes[i]->getX() * Const::WALK_TILE + 4, nodes[i]->getY() * Const::WALK_TILE + 4, 3, BWAPI::Color(nodes[i]->getDangerCost() * 100 / 250, nodes[i]->getDangerCost() * 100 / 250, nodes[i]->getDangerCost() * 100 / 250), true);
+		int x = nodes[i]->getX() * Const::WALK_TILE;
+		int y = nodes[i]->getY() * Const::WALK_TILE;
+		if (nodes[i]->walkable) {
+			Broodwar->drawBoxMap(x, y, x + Const::WALK_TILE, y + Const::WALK_TILE, BWAPI::Color(255, 255, 255), false);
+		} 
+		if (nodes[i]->occupied) {
+			Broodwar->drawBoxMap(x, y, x + Const::WALK_TILE, y + Const::WALK_TILE, BWAPI::Color(0, 255, 0), false);
+		} 
+		if (nodes[i]->updated) {
+			Broodwar->drawBoxMap(x, y, x + Const::WALK_TILE, y + Const::WALK_TILE, BWAPI::Color(0, 0, 255), false);
 		}
-		/*else {
-			if (!Broodwar->isWalkable(nodes[i]->getX(), nodes[i]->getY())) 
-				Broodwar->drawBoxMap(nodes[i]->getX() * WALK_TILE, nodes[i]->getY() * WALK_TILE, nodes[i]->getX() * WALK_TILE + WALK_TILE, nodes[i]->getY() * WALK_TILE + WALK_TILE, BWAPI::Color(0, 0, 255), false);
-		 else 
-				Broodwar->drawBoxMap(nodes[i]->getX() * WALK_TILE, nodes[i]->getY() * WALK_TILE, nodes[i]->getX() * WALK_TILE + WALK_TILE, nodes[i]->getY() * WALK_TILE + WALK_TILE, BWAPI::Color(255, 0, 0), false);
-		}*/
+		if (nodes[i]->getDangerCost() > 0) Broodwar->drawCircleMap(x + 4, y + 4, 3, BWAPI::Color(nodes[i]->getDangerCost() * 100 / 250, nodes[i]->getDangerCost() * 100 / 250, nodes[i]->getDangerCost() * 100 / 250), true);
 	}
 }
 
@@ -158,15 +154,17 @@ void SafePathFinder::drawEnemiesAttackRange() {
 
 			BWAPI::Position position = (*enemy)->getPosition();
 			Broodwar->drawCircleMap(position.x, position.y, weaponRange, BWAPI::Colors::Green, false);
+
 			Broodwar->drawCircleMap(position.x, position.y, (*enemy)->getType().seekRange(), BWAPI::Colors::Purple, false);
+
 			Broodwar->drawCircleMap(position.x, position.y, Const::MAX_RANGE, BWAPI::Colors::Blue, false);
-			for (int x = ((position.x - weaponRange) / Const::WALK_TILE); x <= ((position.x + weaponRange) / Const::WALK_TILE); x++) {
+			/*for (int x = ((position.x - weaponRange) / Const::WALK_TILE); x <= ((position.x + weaponRange) / Const::WALK_TILE); x++) {
 				for (int y = ((position.y - weaponRange) / Const::WALK_TILE); y <= ((position.y + weaponRange) / Const::WALK_TILE); y++) {
 					if ((Utility::distance(position.x, position.y, x * Const::WALK_TILE, y * Const::WALK_TILE)) <= weaponRange) {
 						Broodwar->drawBoxMap(x * Const::WALK_TILE, y * Const::WALK_TILE, x * Const::WALK_TILE + Const::WALK_TILE, y * Const::WALK_TILE + Const::WALK_TILE, BWAPI::Color(255, 0, 0), false);
 					}
 				}
-			}
+			}*/
 		}
 	}
 }

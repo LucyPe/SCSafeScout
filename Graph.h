@@ -4,6 +4,7 @@
 #include "Node.h"
 #include "Terrain.h"
 #include "Utility.h"
+#include "Const.h"
 #include "DangerFunctions/DangerFunction.h"
 
 class Graph {
@@ -18,6 +19,8 @@ private:
 	int width;	// in walktiles x
 	int height; // in walktiles y
 
+	int const WALK_MAX_RANGE = Utility::PositionToWalkPosition((int)Const::MAX_RANGE);
+
 	std::map<std::pair<int, int>, Node*> open_pos;
 	std::multimap<double, Node*> open_f;
 	std::map<std::pair<int, int>, Node*> closed;
@@ -30,10 +33,14 @@ private:
 	void setNodeNeigbours(int, int);
 	void createEdge(int, int, int, int);
 
+	void resetWalkability();
+	void updateWalkability();
+
+	
+
 	int getIndex(int, int);
 
 	DangerFunction* getDangerFunction(BWAPI::UnitType);
-	double getNodeCost(Node*, int, double);
 
 	std::vector<BWAPI::Position> getPath(Node*);
 
@@ -45,6 +52,7 @@ public:
 	Graph(BWAPI::Game*);
 	~Graph();
 
+	bool existsNode(Node*);
 	Terrain* getTerrain();
 
 	std::vector<BWAPI::Position> AStar(BWAPI::Position, BWAPI::Position, double);

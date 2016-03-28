@@ -3,10 +3,9 @@
 
 Node::Node(std::pair<int, int> p) {
 	neighbours = std::vector<Node*>(8, NULL);
-	occupied = false;
-
 	terrainCosts = std::vector<double>(8, INT_MAX);
-
+	walkable = true;
+	updated = false;
 	position = p;
 	resetNode();
 };
@@ -18,10 +17,7 @@ void Node::resetNode() {
 	g = INT_MAX;
 	prev = NULL;
 	dangerCost = 0;
-	dangerUpdate = false;
-	//dangerCosts = std::vector<double>(8, 0.0);
-	//dangerUpdate = std::vector<bool>(8, false);
-	setOccupied(false);
+	occupied = false;
 }
 
 //POSITION
@@ -37,24 +33,9 @@ int Node::getY() {
 	return position.second;
 }
 
-//STATUS
-bool Node::isUpdated() {
-	return  dangerUpdate;
-}
-
-bool Node::isOccupied() {
-	return occupied;
-}
-
-void Node::setOccupied(bool b) {
-	occupied = b;
-}
-
 //NEIGHBOURS
 Node* Node::getNeighbour(int i) {
-	Node* n = neighbours[i];
-	if (n != NULL && n->isOccupied()) return NULL;
-	return n;
+	return neighbours[i];
 }
 
 void Node::setNeighbour(int i, Node* n) {
@@ -63,7 +44,6 @@ void Node::setNeighbour(int i, Node* n) {
 
 //COST
 double Node::getCost(int i, double weight) {
-	//return terrainCosts[i] + weight * dangerCosts[i];
 	return terrainCosts[i] + weight * 20 * neighbours[i]->getDangerCost();
 }
 
@@ -79,7 +59,6 @@ void Node::setTerrainCost(int i, double d) {
 	terrainCosts[i] = d;
 }
 
-void Node::setDangerCost(double d) {
+void Node::addDangerCost(double d) {
 	dangerCost += d;
-	dangerUpdate = true;
 }
