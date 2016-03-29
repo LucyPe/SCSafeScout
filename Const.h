@@ -4,7 +4,6 @@ namespace Const {
 	
 	/* params: 
 	>> GRID >> PATH >> MOVE >> NO_GUI >> LEARNING 
-	>> MODEL
 	>> dangerWeight	
 
 	*/

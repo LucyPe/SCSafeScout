@@ -128,7 +128,7 @@ void SafePathFinder::showGrid() {
 		if (nodes[i]->updated) {
 			Broodwar->drawBoxMap(x, y, x + Const::WALK_TILE, y + Const::WALK_TILE, BWAPI::Color(0, 0, 255), false);
 		}
-		if (nodes[i]->getDangerCost() > 0) Broodwar->drawCircleMap(x + 4, y + 4, 3, BWAPI::Color(nodes[i]->getDangerCost() * 100 / 250, nodes[i]->getDangerCost() * 100 / 250, nodes[i]->getDangerCost() * 100 / 250), true);
+		//if (nodes[i]->getDangerCost() > 0) Broodwar->drawCircleMap(x + 4, y + 4, 3, BWAPI::Color(nodes[i]->getDangerCost() * 100 / 250, nodes[i]->getDangerCost() * 100 / 250, nodes[i]->getDangerCost() * 100 / 250), true);
 	}
 }
 

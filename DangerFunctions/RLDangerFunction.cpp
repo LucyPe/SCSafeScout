@@ -26,12 +26,17 @@ void RLDangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 void RLDangerFunction::learn(double dist) {
 	if (unitPtr != NULL) {
 		double actualHp = (unitPtr->getHitPoints() + unitPtr->getShields());
-		vector<double> input = createInput(dist);
-		vector<double> output = FA->compute(input);
+		vector<double> last_state = createInput(dist);
+		vector<double> output = FA->compute(last_state);
+
+		
+		/*vector<double> next_state = createInput(dist);
+		vector<double> current_state = FA->compute(last_state);*/
+
 		vector<double> target = vector<double>(1, ((hp - actualHp) + Const::GAMMA * output.at(0)));
 
 		if (FA->error(target, output)[0] != 0) {
-			FA->adjust(input, output, target);
+			FA->adjust(last_state, output, target);
 			DangerFunction::visualize(std::to_string(Const::MODEL) + "_" + "Zerg_Hydralisk" + ".dat", false);
 		}
 

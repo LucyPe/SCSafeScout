@@ -24,6 +24,7 @@ void SCSafeScout::onStart() {
 	scout = NULL;
 	if (Const::MODE == 0) {
 		position = Utility::getTrainPosition(&side);
+		pathfinder->LEARNING = true;
 	}
 	else {
 		position = BWAPI::Position(1090, 100);
@@ -72,7 +73,7 @@ void SCSafeScout::onFrame() {
 	//if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) return;
 
 	// Display the game frame rate as text in the upper left area of the screen
-	Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
+	/*Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
 	Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
 	Broodwar->drawTextScreen(200, 40, "Position %d", position_count);
 	Broodwar->drawTextScreen(200, 60, "Frame %d", Broodwar->getFrameCount());
@@ -83,7 +84,7 @@ void SCSafeScout::onFrame() {
 
 	Broodwar->drawTextScreen(10, 40, "XT: %d", (int)floor(((double)(((Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x)) / 32)) + 0.5));
 	Broodwar->drawTextScreen(10, 60, "YT: %d", (int)floor(((double)(((Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y)) / 32)) + 0.5));
-	
+	*/
 	if (pathfinder->GRID) pathfinder->showGrid();
 	if (pathfinder->PATH) pathfinder->showPath();
 
@@ -95,7 +96,6 @@ void SCSafeScout::onFrame() {
 	if (Const::ENEMY_RANGE) pathfinder->drawEnemiesAttackRange();
 
 	frame++;
-	//if (Const::LEARNING && frame >= 10000) Broodwar->restartGame();
 
 	if (setScout()) {
 
