@@ -8,14 +8,18 @@ private:
 	vector<double> data;
 
 public:
+	// width, height
 	int w, h;
 	//params: height, width
 	Matrix(int, int);
 	//params: data array
 	Matrix(vector<double>);
 
+	// returns size of of data array
 	int size();
+	// returns data array
 	vector<double> getData();
+
 	double get(int i);
 	double get(int x, int y);
 	void set(int i, double e);

@@ -12,8 +12,8 @@ namespace Const {
 
 	/* Learning params*/
 	const int LEARNING_FRAME_RATE = 1;
-	const int MODEL = 0;
-	const int MODE = 1; // 0 - training, 1 - testing
+	const int MODEL = 2;
+	const int MODE = 0; // 0 - training, 1 - testing
 
 	/* MAP variables */
 	const int WALK_TILE = 8;

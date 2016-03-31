@@ -18,7 +18,7 @@ Graph::Graph(BWAPI::Game* g) {
 	terrain = new Terrain(g, width, height);
 	map = std::vector<Node*>();
 	dangerFunctions = std::map<BWAPI::UnitType, DangerFunction*>();
-	lastStates = std::map<BWAPI::UnitType, double>();
+	lastStates = std::map<BWAPI::UnitInterface*, double>();
 
 	initNodes();
 }
@@ -180,21 +180,37 @@ DangerFunction* Graph::getDangerFunction(BWAPI::UnitType unitType) {
 
 void Graph::updateDangerFunctions() {
 	//learn for old states
-	for (std::map<BWAPI::UnitType, double>::iterator iterator = lastStates.begin(); iterator != lastStates.end(); iterator++) {
-		getDangerFunction(iterator->first)->learn(iterator->second);
-		Broodwar->drawTextScreen(10, 80, "last: %f", iterator->second);
+	for (std::map<BWAPI::UnitInterface*, double>::iterator iterator = lastStates.begin(); iterator != lastStates.end(); iterator++) {
+		if (iterator->first != NULL && iterator->first->exists() && iterator->first->isVisible()) {
+			getDangerFunction(iterator->first->getType())->learn(iterator->second, iterator->first);	
+		}
+		else {
+			Broodwar->printf("nope");
+		}
+		//Broodwar->drawTextScreen(10, 80, "last: %f", iterator->second);
 
 	}
 
 	//add new states
-	std::map<BWAPI::UnitType, double> newStates = std::map<BWAPI::UnitType, double>();
+	/*std::map<BWAPI::UnitType, double> newStates = std::map<BWAPI::UnitType, double>();
 	BWAPI::Unitset units = Broodwar->getUnitsInRadius(unit->getPosition().x, unit->getPosition().y, (int) Const::MAX_RANGE);
 	for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
 		if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
 			BWAPI::Position pos = (*enemy)->getPosition();
 			double dist = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
 			newStates[(*enemy)->getType()] = dist;
-			Broodwar->drawTextScreen(10, 100, "new: %f", dist);
+			//Broodwar->drawTextScreen(10, 100, "new: %f", dist);
+		}
+	}*/
+
+	std::map<BWAPI::UnitInterface*, double> newStates = std::map<BWAPI::UnitInterface*, double>();
+	BWAPI::Unitset units = Broodwar->getUnitsInRadius(unit->getPosition().x, unit->getPosition().y, (int)Const::MAX_RANGE);
+	for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
+		if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
+			BWAPI::Position pos = (*enemy)->getPosition();
+			double dist = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
+			newStates[(*enemy)] = dist;
+			//Broodwar->drawTextScreen(10, 100, "new: %f", dist);
 		}
 	}
 	lastStates = newStates;

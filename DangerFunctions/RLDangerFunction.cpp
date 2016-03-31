@@ -23,17 +23,26 @@ void RLDangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 	hp = (unitPtr->getHitPoints() + unitPtr->getShields());
 }
 
-void RLDangerFunction::learn(double dist) {
+void RLDangerFunction::learn(double dist, BWAPI::UnitInterface* enemy) {
 	if (unitPtr != NULL) {
 		double actualHp = (unitPtr->getHitPoints() + unitPtr->getShields());
 		vector<double> last_state = createInput(dist);
 		vector<double> output = FA->compute(last_state);
 
-		
-		/*vector<double> next_state = createInput(dist);
-		vector<double> current_state = FA->compute(last_state);*/
+		double new_dist = dist;
+		if (enemy != NULL) {
+			BWAPI::Position unit_pos = unitPtr->getPosition();
+			BWAPI::Position enemy_pos = enemy->getPosition();
+			new_dist = Utility::distance(unit_pos.x, unit_pos.y, enemy_pos.x, enemy_pos.y);
+		}
+		else {
+			Utility::printToFile(Const::PATH_ERROR, "ActualDangerFunction - no enemy unit pointer");
+		}
 
-		vector<double> target = vector<double>(1, ((hp - actualHp) + Const::GAMMA * output.at(0)));
+		vector<double> new_state = createInput(new_dist);
+		vector<double> new_output = FA->compute(new_state);
+
+		vector<double> target = vector<double>(1, ((hp - actualHp) + Const::GAMMA * new_output.at(0)));
 
 		if (FA->error(target, output)[0] != 0) {
 			FA->adjust(last_state, output, target);

@@ -25,7 +25,7 @@ private:
 	std::multimap<double, Node*> open_f;
 	std::map<std::pair<int, int>, Node*> closed;
 	
-	std::map<BWAPI::UnitType, double> lastStates;
+	std::map<BWAPI::UnitInterface*, double> lastStates;
 
 	void initNodes();
 	void deleteNodes();

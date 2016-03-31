@@ -23,7 +23,7 @@ void ActualDangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 	hp = (unitPtr->getHitPoints() + unitPtr->getShields());
 }
 
-void ActualDangerFunction::learn(double dist) {
+void ActualDangerFunction::learn(double dist, BWAPI::UnitInterface* = NULL) {
 	if (unitPtr != NULL) {
 		double actualHp = (unitPtr->getHitPoints() + unitPtr->getShields());
 		vector<double> input = createInput(dist);
