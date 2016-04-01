@@ -3,15 +3,14 @@
 namespace Const {
 	
 	/* params: 
-	>> GRID >> PATH >> MOVE >> NO_GUI >> LEARNING 
+	>> GRID >> PATH >> MOVE >> NO_GUI >> TERRAIN_DATA >> ENEMY_RANGE
 	>> dangerWeight	
-
 	*/
 
 	const double DANGER_WEIGTH = 1; // interval <0,1>
 
 	/* Learning params*/
-	const int LEARNING_FRAME_RATE = 1;
+	const int LEARNING_FRAME_RATE = 5;
 	const int MODEL = 2;
 	const int MODE = 0; // 0 - training, 1 - testing
 
@@ -26,8 +25,8 @@ namespace Const {
 	const int NEURONS = 5;
 	const int CENTERS = 20;
 
-	const double ALPHA = 0.02;
-	const double GAMMA = 0.9931; //sqrt(0.08,100)
+	const double ALPHA = 0.1;
+	const double GAMMA = 0.88; //sqrt(0.08,20)
 	const double SIGMA = (MAX_RANGE / CENTERS) / MAX_RANGE;
 	const double RADIUS = (MAX_RANGE / CENTERS) / MAX_RANGE;
 
@@ -37,10 +36,4 @@ namespace Const {
 	const char * const PATH_WRITE = "bwapi-data/write/";
 	const char * const PATH_DEBUG = "bwapi-data/write/debug.txt";
 	const char * const PATH_ERROR = "bwapi-data/write/errors.txt";
-
-	/* Visual data */
-	const bool TERRAIN_DATA = 1;
-	const bool ENEMY_RANGE = 1;
-
-	/**/
 }

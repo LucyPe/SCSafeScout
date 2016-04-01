@@ -19,13 +19,3 @@ void FunctionApproximator::adjust_weight(vector<double> error, Matrix* weight, v
 		}
 	}
 }
-
-void FunctionApproximator::adjustToZero(vector<double> input, vector<double> output) {
-	double old_alpha = alpha;
-	alpha = 1.0;
-	//Utility::printToFile(Const::PATH_WRITE + (string) "aa.txt", "alpha:" + std::to_string(alpha));
-
-	vector<double> target = vector<double>(output.size(), 0);
-	adjust(input, output, target);
-	alpha = old_alpha;
-}

@@ -34,19 +34,16 @@ private:
 	void createEdge(int, int, int, int);
 
 	void resetWalkability();
-	void updateWalkability();
-
-	
 
 	int getIndex(int, int);
 
 	DangerFunction* getDangerFunction(BWAPI::UnitType);
 
-	std::vector<BWAPI::Position> getPath(Node*);
-
 	void updateUnits();
-	void updateDanger();
-	void updateNode();
+	void updateDanger(BWAPI::UnitInterface*);
+	void updateWalkability(BWAPI::UnitInterface*);
+
+	std::vector<BWAPI::Position> getPath(Node*);
 
 public:
 	Graph(BWAPI::Game*);

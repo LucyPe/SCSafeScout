@@ -44,7 +44,7 @@ void Node::setNeighbour(int i, Node* n) {
 
 //COST
 double Node::getCost(int i, double weight) {
-	return terrainCosts[i] + weight * 20 * neighbours[i]->getDangerCost();
+	return terrainCosts[i] + weight * /* 2 * */ neighbours[i]->getDangerCost();
 }
 
 double Node::getDangerCost() {

@@ -8,7 +8,6 @@ private:
 	FunctionApproximator* FA;
 
 	double hp;
-	double maxHp;
 	vector<double> createInput(double);
 
 public:

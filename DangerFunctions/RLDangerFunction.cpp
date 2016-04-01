@@ -5,7 +5,6 @@
 
 RLDangerFunction::RLDangerFunction(BWAPI::UnitType unit, FunctionApproximator* fApprox) : DangerFunction(unit) {
 	FA = fApprox;
-	maxHp = 1;
 }
 
 RLDangerFunction::~RLDangerFunction() {
@@ -19,7 +18,6 @@ vector<double> RLDangerFunction::createInput(double dist) {
 
 void RLDangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 	DangerFunction::setUnitPtr(unit);
-	maxHp = unitPtr->getType().maxHitPoints() + unitPtr->getType().maxShields();
 	hp = (unitPtr->getHitPoints() + unitPtr->getShields());
 }
 
@@ -28,6 +26,8 @@ void RLDangerFunction::learn(double dist, BWAPI::UnitInterface* enemy) {
 		double actualHp = (unitPtr->getHitPoints() + unitPtr->getShields());
 		vector<double> last_state = createInput(dist);
 		vector<double> output = FA->compute(last_state);
+
+		//Utility::printToFile(Const::PATH_ERROR, std::to_string(hp) + " " + std::to_string(maxHp));
 
 		double new_dist = dist;
 		if (enemy != NULL) {
@@ -43,6 +43,8 @@ void RLDangerFunction::learn(double dist, BWAPI::UnitInterface* enemy) {
 		vector<double> new_output = FA->compute(new_state);
 
 		vector<double> target = vector<double>(1, ((hp - actualHp) + Const::GAMMA * new_output.at(0)));
+
+		//Utility::printToFile(Const::PATH_DEBUG, std::to_string(dist) + " " + std::to_string(new_dist) + " " + std::to_string(new_output.at(0)));
 
 		if (FA->error(target, output)[0] != 0) {
 			FA->adjust(last_state, output, target);

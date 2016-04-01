@@ -181,28 +181,12 @@ DangerFunction* Graph::getDangerFunction(BWAPI::UnitType unitType) {
 void Graph::updateDangerFunctions() {
 	//learn for old states
 	for (std::map<BWAPI::UnitInterface*, double>::iterator iterator = lastStates.begin(); iterator != lastStates.end(); iterator++) {
-		if (iterator->first != NULL && iterator->first->exists() && iterator->first->isVisible()) {
+		if (iterator->first != NULL) {
 			getDangerFunction(iterator->first->getType())->learn(iterator->second, iterator->first);	
 		}
-		else {
-			Broodwar->printf("nope");
-		}
-		//Broodwar->drawTextScreen(10, 80, "last: %f", iterator->second);
-
 	}
 
 	//add new states
-	/*std::map<BWAPI::UnitType, double> newStates = std::map<BWAPI::UnitType, double>();
-	BWAPI::Unitset units = Broodwar->getUnitsInRadius(unit->getPosition().x, unit->getPosition().y, (int) Const::MAX_RANGE);
-	for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
-		if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
-			BWAPI::Position pos = (*enemy)->getPosition();
-			double dist = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
-			newStates[(*enemy)->getType()] = dist;
-			//Broodwar->drawTextScreen(10, 100, "new: %f", dist);
-		}
-	}*/
-
 	std::map<BWAPI::UnitInterface*, double> newStates = std::map<BWAPI::UnitInterface*, double>();
 	BWAPI::Unitset units = Broodwar->getUnitsInRadius(unit->getPosition().x, unit->getPosition().y, (int)Const::MAX_RANGE);
 	for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
@@ -216,52 +200,61 @@ void Graph::updateDangerFunctions() {
 	lastStates = newStates;
 }
 
-// disable Nodes under all units
+
 void Graph::updateUnits() {
 	BWAPI::Unitset units = Broodwar->getAllUnits();
 
 	for (auto u = units.begin(); u != units.end(); ++u) {
 
-		if ((*u) == unit || ((*u)->isFlying() != unit->isFlying())) continue;
+		if ((*u) == unit) continue;
 
-		for (int x = (*u)->getLeft() - unitType.dimensionRight() + 1; x < (*u)->getRight() + unitType.dimensionLeft() - 1; x++) {
-			for (int y = (*u)->getTop() - unitType.dimensionDown() + 1 ; y < (*u)->getBottom() + unitType.dimensionUp() - 1; y++) {
-				int index = getIndex(Utility::PositionToWalkPosition(x), Utility::PositionToWalkPosition(y));
-				if (index >= 0 && index < map.size()) {
-					map[index]->occupied = true;
-				}
+		if ((*u)->isFlying() != unit->isFlying()) {
+			updateWalkability(*u);
+		}
+
+		if ((*u)->getPlayer()->isEnemy(Broodwar->self())) {
+			updateDanger(*u);
+		}	
+	}
+}
+
+// disable Nodes under all units
+void Graph::updateWalkability(BWAPI::UnitInterface* unit) {
+	int pos_x_start = Utility::PositionToWalkPosition(unit->getLeft() - unitType.dimensionRight() + 1);
+	int pos_y_start = Utility::PositionToWalkPosition(unit->getTop() - unitType.dimensionDown() + 1);
+	int pos_x_end = Utility::PositionToWalkPosition(unit->getRight() + unitType.dimensionLeft() - 1);
+	int pos_y_end = Utility::PositionToWalkPosition(unit->getBottom() + unitType.dimensionUp() - 1);
+
+	for (int x = pos_x_start; x < pos_x_end; x++) {
+		for (int y = pos_y_start; y < pos_y_end; y++) {
+			int index = getIndex(x, y);
+			if (index >= 0 && index < map.size()) {
+				map[index]->occupied = true;
 			}
 		}
 	}
 }
 
 // update all nodes with danger
-void Graph::updateDanger() {
-	BWAPI::Unitset units = Broodwar->getAllUnits();
+void Graph::updateDanger(BWAPI::UnitInterface* enemy) {		
+	BWAPI::UnitType enemyType = enemy->getType();
+	BWAPI::Position position = enemy->getPosition();
 
-	for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
-
-		if (!(*enemy)->getPlayer()->isEnemy(Broodwar->self())) continue;
+	int pos_x = Utility::PositionToWalkPosition(position.x);
+	int pos_y = Utility::PositionToWalkPosition(position.y);
 		
-		BWAPI::UnitType enemyType = (*enemy)->getType();
-		BWAPI::Position position = (*enemy)->getPosition();
+	int pos_x_start = max(0, pos_x - WALK_MAX_RANGE);
+	int pos_y_start = max(0, pos_y - WALK_MAX_RANGE);
+	int pos_x_end = min(width - 1, pos_x + WALK_MAX_RANGE);
+	int pos_y_end = min(height - 1, pos_y + WALK_MAX_RANGE);
 
-		int pos_x = Utility::PositionToWalkPosition(position.x);
-		int pos_y = Utility::PositionToWalkPosition(position.y);
-		
-		int pos_x_start = max(0, pos_x - WALK_MAX_RANGE);
-		int pos_y_start = max(0, pos_y - WALK_MAX_RANGE);
-		int pos_x_end = min(width - 1, pos_x + WALK_MAX_RANGE);
-		int pos_y_end = min(height - 1, pos_y + WALK_MAX_RANGE);
-
-		// in walktiles
-		for (int x = pos_x_start; x <= pos_x_end; x++) {
-			for (int y = pos_y_start; y <= pos_y_end; y++) {
-				int index = getIndex(x, y);
-				if (existsNode(map[index])) {
-					double dist = Utility::distance(x, y, pos_x, pos_y) * Const::WALK_TILE;
-					map[getIndex(x, y)]->addDangerCost(max(0.0, getDangerFunction(enemyType)->compute(dist)));
-				}
+	// in walktiles
+	for (int x = pos_x_start; x <= pos_x_end; x++) {
+		for (int y = pos_y_start; y <= pos_y_end; y++) {
+			int index = getIndex(x, y);
+			if (existsNode(map[index])) {
+				double dist = Utility::distance(x, y, pos_x, pos_y) * Const::WALK_TILE;
+				map[getIndex(x, y)]->addDangerCost(max(0.0, getDangerFunction(enemyType)->compute(dist)));
 			}
 		}
 	}
@@ -285,7 +278,6 @@ std::vector<BWAPI::Position> Graph::getPath(Node* current) {
 std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, double weight) {
 	resetNodes();
 	updateUnits();
-	updateDanger();
 
 	std::pair<int, int> start = std::pair<int, int>(Utility::PositionToWalkPosition(s.x), Utility::PositionToWalkPosition(s.y));
 	std::pair<int, int> end = std::pair<int, int>(Utility::PositionToWalkPosition(e.x), Utility::PositionToWalkPosition(e.y));

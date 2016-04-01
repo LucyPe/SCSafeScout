@@ -30,6 +30,8 @@ public:
 	bool PATH = true;
 	bool MOVE = true;
 	bool NO_GUI = false;
+	bool TERRAIN_DATA = false;
+	bool ENEMY_RANGE = true;
 
 	/* Model Params */
 	bool LEARNING = true;

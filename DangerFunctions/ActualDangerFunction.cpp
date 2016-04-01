@@ -5,7 +5,6 @@
 
 ActualDangerFunction::ActualDangerFunction(BWAPI::UnitType enemy, FunctionApproximator* fApprox) : DangerFunction(enemy) {
 	FA = fApprox;
-	maxHp = 1;
 }
 
 ActualDangerFunction::~ActualDangerFunction() {
@@ -19,7 +18,6 @@ vector<double> ActualDangerFunction::createInput(double dist) {
 
 void ActualDangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 	DangerFunction::setUnitPtr(unit);
-	maxHp = unitPtr->getType().maxHitPoints() + unitPtr->getType().maxShields();
 	hp = (unitPtr->getHitPoints() + unitPtr->getShields());
 }
 

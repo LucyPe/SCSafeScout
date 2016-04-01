@@ -73,12 +73,12 @@ void SCSafeScout::onFrame() {
 	//if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) return;
 
 	// Display the game frame rate as text in the upper left area of the screen
-	/*Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
+	Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
 	Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
 	Broodwar->drawTextScreen(200, 40, "Position %d", position_count);
 	Broodwar->drawTextScreen(200, 60, "Frame %d", Broodwar->getFrameCount());
 	Broodwar->drawTextScreen(200, 80, "Path %d", pathfinder->pathLenght());
-
+	/*
 	Broodwar->drawTextScreen(10, 0, "X: %d", Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x);
 	Broodwar->drawTextScreen(10, 20, "Y: %d", Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
 
@@ -88,12 +88,12 @@ void SCSafeScout::onFrame() {
 	if (pathfinder->GRID) pathfinder->showGrid();
 	if (pathfinder->PATH) pathfinder->showPath();
 
-	if (Const::TERRAIN_DATA) {
+	if (pathfinder->TERRAIN_DATA) {
 		pathfinder->drawTerrainData();
 		pathfinder->showPolygons();
 	}
 
-	if (Const::ENEMY_RANGE) pathfinder->drawEnemiesAttackRange();
+	if (pathfinder->ENEMY_RANGE) pathfinder->drawEnemiesAttackRange();
 
 	frame++;
 

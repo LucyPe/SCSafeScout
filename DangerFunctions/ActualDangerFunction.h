@@ -9,8 +9,6 @@ private:
 
 	//current hp
 	double hp;
-	// max hp for agent unit
-	double maxHp;
 
 	// method for converting input to vector
 	vector<double> createInput(double);
