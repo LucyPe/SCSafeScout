@@ -51,11 +51,6 @@ void MLP::saveToFile() {
 	}
 }
 
-void MLP::weights() {
-	cout << w->toString() << endl;
-	cout << v->toString() << endl;
-}
-
 void MLP::sigmoid(vector<double>* l) {
 	for (int i = 0; i < l->size(); i++) {
 		(*l)[i] = 1 / (1 + pow(exp(1.0), -(l->at(i))));

@@ -30,7 +30,7 @@ public:
 	* distance from enemy unit in state1
 	* pointer to enemy unit for computing distance from agent in state2
 	*/
-	virtual void learn(double dist, BWAPI::UnitInterface*) {};
+	virtual void learn(double dist, double) {};
 
 	// save danger function to file
 	void visualize(string, bool);

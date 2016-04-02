@@ -20,5 +20,5 @@ public:
 	void setUnitPtr(BWAPI::UnitInterface*);
 
 	double compute(double);
-	void learn(double, BWAPI::UnitInterface*);
+	void learn(double, double);
 };

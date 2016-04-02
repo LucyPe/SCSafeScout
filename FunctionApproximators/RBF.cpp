@@ -40,6 +40,8 @@ RBF::RBF(int i, int o, int h, double a, double s, double start, double radius, s
 }
 
 RBF::~RBF(void) {
+	delete(w);
+	delete(v);
 }
 
 double RBF::norm(vector<double> x, vector<double> y) {

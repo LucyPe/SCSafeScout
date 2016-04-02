@@ -18,7 +18,7 @@ Graph::Graph(BWAPI::Game* g) {
 	terrain = new Terrain(g, width, height);
 	map = std::vector<Node*>();
 	dangerFunctions = std::map<BWAPI::UnitType, DangerFunction*>();
-	lastStates = std::map<BWAPI::UnitInterface*, double>();
+	enemy = NULL;
 
 	initNodes();
 }
@@ -28,7 +28,8 @@ Graph::~Graph() {
 
 	// delete danger functions
 	for (std::map<BWAPI::UnitType, DangerFunction*>::iterator itr = dangerFunctions.begin(); itr != dangerFunctions.end(); ++itr) {
-		itr->second->visualize(std::to_string(Const::MODEL) + "_" + itr->second->getEnemyType().toString() + ".dat", false);
+		// save visualization to file
+		itr->second->visualize(itr->first.toString() + ".dat", false);
 		delete(itr->second);
 		dangerFunctions.erase(itr);
 	}
@@ -48,8 +49,8 @@ void Graph::initNodes() {
 	for (int h = 0; h < height; h++) {
 		for (int w = 0; w < width; w++) {
 			Node* node = new Node(std::pair<int, int>(w, h));
-			if (terrain->getWalkabilityData(w, h) == 0) {
-				node->walkable= false;
+			if (terrain->isWalkable(w, h) == 0) {
+				node->isWalkable= false;
 			}
 			map.push_back(node);
 		}
@@ -128,14 +129,14 @@ void  Graph::setUnitPointer(BWAPI::UnitInterface* u) {
 
 void Graph::resetWalkability() {
 	for (unsigned int i = 0; i < map.size(); i++) {
-		map[i]->walkable = (unitType.isFlyer()) ? true : terrain->getWalkabilityData(map[i]->getX(), map[i]->getY());
+		map[i]->isWalkable = (unitType.isFlyer()) ? true : terrain->isWalkable(map[i]->getX(), map[i]->getY());
 		map[i]->updated = false;
 	}
 
 	if (!unit->isFlying()) {
 		for (unsigned int i = 0; i < map.size(); i++) {
 
-			if (map[i]->walkable) {
+			if (map[i]->isWalkable) {
 				int size = Utility::PositionToWalkPosition(max(unitType.height(), unitType.width())/2) + 1;
 
 				int pos_x_start = max(0, map[i]->getX() - size);
@@ -146,8 +147,8 @@ void Graph::resetWalkability() {
 				for (int x = pos_x_start; x <= pos_x_end; x++) {
 					for (int y = pos_y_start; y <= pos_y_end; y++) {
 						int index = getIndex(x, y);
-						if (!map[index]->updated && !map[index]->walkable) {
-							map[i]->walkable = false;
+						if (!map[index]->updated && !map[index]->isWalkable) {
+							map[i]->isWalkable = false;
 							map[i]->updated = true;
 							break;
 						}
@@ -159,62 +160,68 @@ void Graph::resetWalkability() {
 	}
 }
 
-DangerFunction* Graph::getDangerFunction(BWAPI::UnitType unitType) {
-	if (dangerFunctions.find(unitType) == dangerFunctions.end()) {
+DangerFunction* Graph::getDangerFunction(BWAPI::UnitType enemyType) {
+	if (dangerFunctions.find(enemyType) == dangerFunctions.end()) {
 		switch (Const::MODEL) {
 			case 1:
-				dangerFunctions[unitType] = new ActualDangerFunction(unitType,
-					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt", true));
+				dangerFunctions[enemyType] = new ActualDangerFunction(enemyType,
+					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::PATH_FA + enemyType.toString(), true));
 				break;
 			case 2:
-				dangerFunctions[unitType] = new RLDangerFunction(unitType,
-					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::ADF_WRITE_PATH + BWAPI::UnitTypes::Zerg_Hydralisk.toString() + ".txt", true));
+				dangerFunctions[enemyType] = new RLDangerFunction(enemyType,
+					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::PATH_FA + enemyType.toString(), true));
 				break;
 			default:
-				dangerFunctions[unitType] = new ComputedDangerFunction(unitType);
+				dangerFunctions[enemyType] = new ComputedDangerFunction(enemyType);
 		}
-		dangerFunctions[unitType]->setUnitPtr(unit);
+		dangerFunctions[enemyType]->setUnitPtr(unit);
 	}
-	return dangerFunctions.at(unitType);
+	return dangerFunctions.at(enemyType);
 }
 
+// learning for one enemy unit
 void Graph::updateDangerFunctions() {
-	//learn for old states
-	for (std::map<BWAPI::UnitInterface*, double>::iterator iterator = lastStates.begin(); iterator != lastStates.end(); iterator++) {
-		if (iterator->first != NULL) {
-			getDangerFunction(iterator->first->getType())->learn(iterator->second, iterator->first);	
+	// set enemy unit for training
+	if (enemy == NULL) {
+		BWAPI::Unitset units = Broodwar->getAllUnits();
+		for (auto u = units.begin(); u != units.end(); ++u) {
+			if ((*u)->getPlayer()->isEnemy(Broodwar->self())) {
+				enemy = *u;	
+				BWAPI::Position pos = enemy->getPosition();
+				last_state = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
+			}
 		}
 	}
-
-	//add new states
-	std::map<BWAPI::UnitInterface*, double> newStates = std::map<BWAPI::UnitInterface*, double>();
-	BWAPI::Unitset units = Broodwar->getUnitsInRadius(unit->getPosition().x, unit->getPosition().y, (int)Const::MAX_RANGE);
-	for (auto enemy = units.begin(); enemy != units.end(); ++enemy) {
-		if ((*enemy)->getPlayer()->isEnemy(Broodwar->self())) {
-			BWAPI::Position pos = (*enemy)->getPosition();
-			double dist = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
-			newStates[(*enemy)] = dist;
-			//Broodwar->drawTextScreen(10, 100, "new: %f", dist);
+	else {
+		double new_state;
+		if (enemy->isVisible()) {
+			BWAPI::Position pos = enemy->getPosition();
+			new_state = Utility::distance(unit->getPosition().x, unit->getPosition().y, pos.x, pos.y);
+			getDangerFunction(enemy->getType())->learn(last_state, new_state);
 		}
+		else {
+			new_state = last_state + unitType.topSpeed();
+			getDangerFunction(enemy->getType())->learn(last_state, new_state);
+			enemy = NULL;
+		}
+		last_state = new_state;
 	}
-	lastStates = newStates;
 }
 
 
 void Graph::updateUnits() {
 	BWAPI::Unitset units = Broodwar->getAllUnits();
-
 	for (auto u = units.begin(); u != units.end(); ++u) {
-
+		
 		if ((*u) == unit) continue;
 
-		if ((*u)->isFlying() != unit->isFlying()) {
+		if ((*u)->isFlying() == unit->isFlying()) {
 			updateWalkability(*u);
+			
 		}
-
 		if ((*u)->getPlayer()->isEnemy(Broodwar->self())) {
-			updateDanger(*u);
-		}	
+			updateDanger(*u); 
+		}
 	}
 }
 
@@ -261,7 +268,7 @@ void Graph::updateDanger(BWAPI::UnitInterface* enemy) {
 }
 
 bool Graph::existsNode(Node* node) {	
-	if (node == NULL || !node->walkable || node->occupied) return false;
+	if (node == NULL || !node->isWalkable || node->occupied) return false;
 	return true;
 }
 

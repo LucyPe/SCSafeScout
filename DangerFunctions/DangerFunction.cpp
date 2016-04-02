@@ -20,8 +20,8 @@ void DangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 
 void DangerFunction::visualize(string fileName, bool append) {
 	ofstream output;
-	if (append) output.open(Const::PATH_WRITE + fileName, std::ofstream::out | std::ofstream::app);
-	else output.open(Const::PATH_WRITE + fileName, std::ofstream::out);
+	if (append) output.open(fileName, std::ofstream::out | std::ofstream::app);
+	else output.open(fileName, std::ofstream::out);
 	
 	if (output.is_open()) {
 		output << std::setprecision(10);

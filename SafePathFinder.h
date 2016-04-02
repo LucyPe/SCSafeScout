@@ -17,6 +17,12 @@ private:
 	bool existPath();
 	bool findPath(BWAPI::Position, BWAPI::Position);
 	BWAPI::Position nextPosition();
+
+	void showGrid();
+	void showPath();
+	void showPolygons();
+	void drawTerrainData();
+	void drawEnemiesAttackRange();
 	
 public:
 	SafePathFinder(BWAPI::Game*);
@@ -42,13 +48,9 @@ public:
 
 	int pathLenght();
 	void changePosition(BWAPI::Position);
-	bool moveUnit(BWAPI::Position, int);
+	bool moveUnit(BWAPI::Position);
 
-	void showGrid();
-	void showPath();
-	void showPolygons();
-	void drawTerrainData();
-	void drawEnemiesAttackRange();
+	void visualizeData();
 };
 
 

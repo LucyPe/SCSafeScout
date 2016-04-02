@@ -27,9 +27,5 @@ public:
 	vector<double> error(vector<double>, vector<double>);
 	// params: input, output, target
 	void adjust(vector<double>, vector<double>, vector<double>);
-
-
-	/*Debug functions*/
-	void weights();
 };
 

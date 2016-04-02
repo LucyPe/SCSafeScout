@@ -4,7 +4,7 @@
 Node::Node(std::pair<int, int> p) {
 	neighbours = std::vector<Node*>(8, NULL);
 	terrainCosts = std::vector<double>(8, INT_MAX);
-	walkable = true;
+	isWalkable = true;
 	updated = false;
 	position = p;
 	resetNode();

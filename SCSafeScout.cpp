@@ -6,13 +6,10 @@
 
 using namespace BWAPI;
 
-int frame = 0;
 SafePathFinder* pathfinder;
 UnitInterface* scout;
 
 Position position;
-bool side = 1;
-int position_count = 0;
 
 void SCSafeScout::onStart() {
 	//CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
@@ -23,7 +20,7 @@ void SCSafeScout::onStart() {
 
 	scout = NULL;
 	if (Const::MODE == 0) {
-		position = Utility::getTrainPosition(&side);
+		position = Utility::getTrainPosition(&Const::SIDE);
 		pathfinder->LEARNING = true;
 	}
 	else {
@@ -40,10 +37,10 @@ void SCSafeScout::onStart() {
 	}
 
 	std::ifstream file;
-	file.open(Const::PATH_DEBUG);
+	file.open(Const::PATH_TEMP);
 
 	if (file.is_open()) {
-		file >> position_count;
+		file >> Const::ITERATION >> Const::POSITION_COUNT;
 		file.close();
 	}
 
@@ -57,10 +54,9 @@ void SCSafeScout::onStart() {
 
 void SCSafeScout::onEnd(bool isWinner) {
 	std::ofstream file;
-	file.open(Const::PATH_DEBUG);
-
+	file.open(Const::PATH_TEMP);
 	if (file.is_open()) {
-		file << position_count;
+		file << Const::ITERATION << " " << Const::POSITION_COUNT;
 		file.close();
 	}
 
@@ -72,30 +68,8 @@ void SCSafeScout::onFrame() {
 	if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self()) return;
 	//if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) return;
 
-	// Display the game frame rate as text in the upper left area of the screen
-	Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
-	Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
-	Broodwar->drawTextScreen(200, 40, "Position %d", position_count);
-	Broodwar->drawTextScreen(200, 60, "Frame %d", Broodwar->getFrameCount());
-	Broodwar->drawTextScreen(200, 80, "Path %d", pathfinder->pathLenght());
-	/*
-	Broodwar->drawTextScreen(10, 0, "X: %d", Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x);
-	Broodwar->drawTextScreen(10, 20, "Y: %d", Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
-
-	Broodwar->drawTextScreen(10, 40, "XT: %d", (int)floor(((double)(((Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x)) / 32)) + 0.5));
-	Broodwar->drawTextScreen(10, 60, "YT: %d", (int)floor(((double)(((Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y)) / 32)) + 0.5));
-	*/
-	if (pathfinder->GRID) pathfinder->showGrid();
-	if (pathfinder->PATH) pathfinder->showPath();
-
-	if (pathfinder->TERRAIN_DATA) {
-		pathfinder->drawTerrainData();
-		pathfinder->showPolygons();
-	}
-
-	if (pathfinder->ENEMY_RANGE) pathfinder->drawEnemiesAttackRange();
-
-	frame++;
+	displayGui();
+	pathfinder->visualizeData();
 
 	if (setScout()) {
 
@@ -107,21 +81,26 @@ void SCSafeScout::onFrame() {
 
 		// move
 		if (pathfinder->MOVE) {
-			if (!pathfinder->moveUnit(position, frame)){
+			if (!pathfinder->moveUnit(position)){
 				if (Const::MODE == 0) {
-					position = Utility::getTrainPosition(&side);
+					position = Utility::getTrainPosition(&Const::SIDE);
 					pathfinder->changePosition(position);
-					position_count++;
+					Const::POSITION_COUNT++;
 
-					/*if (position_count % 10 == 0) {
-					Utility::printToFile(Const::PATH_DEBUG, std::to_string(position_count));
-					}*/
-					//if (position_count == 1000) Broodwar->pauseGame();
-				}
-				else {
-
-				}
-				
+					if (Const::POSITION_COUNT == 1000) {
+						Const::ITERATION++;
+						Const::GAMMA += 0.5;
+						if (Const::GAMMA == 1) {
+							Const::ALPHA += 0.05;
+							Const::GAMMA = 0.7;
+						}
+						if (Const::ALPHA >= 0.3) {
+							onEnd(false);
+							Broodwar->pauseGame();
+						}
+						Broodwar->restartGame();
+					}
+				}	
 			}
 		}
 	}
@@ -283,3 +262,18 @@ bool SCSafeScout::setScout() {
 	return false;
 }
 
+void SCSafeScout::displayGui() {
+	// Display the game frame rate as text in the upper left area of the screen
+	Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
+	Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
+	Broodwar->drawTextScreen(200, 40, "Position %d", Const::POSITION_COUNT);
+	Broodwar->drawTextScreen(200, 60, "Frame %d", Broodwar->getFrameCount());
+	Broodwar->drawTextScreen(200, 80, "Path %d", pathfinder->pathLenght());
+	/*
+	Broodwar->drawTextScreen(10, 0, "X: %d", Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x);
+	Broodwar->drawTextScreen(10, 20, "Y: %d", Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
+
+	Broodwar->drawTextScreen(10, 40, "XT: %d", (int)floor(((double)(((Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x)) / 32)) + 0.5));
+	Broodwar->drawTextScreen(10, 60, "YT: %d", (int)floor(((double)(((Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y)) / 32)) + 0.5));
+	*/
+}

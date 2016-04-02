@@ -17,6 +17,6 @@ public:
 	void setUnitPtr(BWAPI::UnitInterface*);
 
 	double compute(double dist);
-	void learn(double, BWAPI::UnitInterface* = NULL);
+	void learn(double, double);
 };
 

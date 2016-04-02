@@ -21,23 +21,13 @@ void RLDangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 	hp = (unitPtr->getHitPoints() + unitPtr->getShields());
 }
 
-void RLDangerFunction::learn(double dist, BWAPI::UnitInterface* enemy) {
+void RLDangerFunction::learn(double dist, double new_dist) {
 	if (unitPtr != NULL) {
 		double actualHp = (unitPtr->getHitPoints() + unitPtr->getShields());
 		vector<double> last_state = createInput(dist);
 		vector<double> output = FA->compute(last_state);
 
 		//Utility::printToFile(Const::PATH_ERROR, std::to_string(hp) + " " + std::to_string(maxHp));
-
-		double new_dist = dist;
-		if (enemy != NULL) {
-			BWAPI::Position unit_pos = unitPtr->getPosition();
-			BWAPI::Position enemy_pos = enemy->getPosition();
-			new_dist = Utility::distance(unit_pos.x, unit_pos.y, enemy_pos.x, enemy_pos.y);
-		}
-		else {
-			Utility::printToFile(Const::PATH_ERROR, "ActualDangerFunction - no enemy unit pointer");
-		}
 
 		vector<double> new_state = createInput(new_dist);
 		vector<double> new_output = FA->compute(new_state);
@@ -48,7 +38,7 @@ void RLDangerFunction::learn(double dist, BWAPI::UnitInterface* enemy) {
 
 		if (FA->error(target, output)[0] != 0) {
 			FA->adjust(last_state, output, target);
-			DangerFunction::visualize(std::to_string(Const::MODEL) + "_" + "Zerg_Hydralisk" + ".dat", false);
+			DangerFunction::visualize(Const::PATH_DF + "tmp.dat", false);
 		}
 
 		hp = actualHp;

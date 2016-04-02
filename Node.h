@@ -16,7 +16,7 @@ public:
 
 	// if there is unit or building
 	bool occupied;
-	bool walkable;
+	bool isWalkable;
 	bool updated;
 
 	void resetNode();

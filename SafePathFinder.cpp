@@ -79,7 +79,7 @@ void SafePathFinder::changePosition(BWAPI::Position position) {
 }
 
 
-bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
+bool SafePathFinder::moveUnit(BWAPI::Position position) {
 	if (unit != NULL) {
 		BWAPI::Unitset enemies = unit->getUnitsInRadius(Const::MAX_RANGE);
 		BWAPI::Position unitPosition = unit->getPosition();
@@ -88,6 +88,7 @@ bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
 			if (Utility::PositionInRange(nextPosition(), unitPosition, Const::WALK_TILE * 10)) {
 				path.pop_back();
 			
+				int frame = Broodwar->getFrameCount();
 				// update FA
 				if (LEARNING && (frame % Const::LEARNING_FRAME_RATE == 0)) map->updateDangerFunctions();
 				
@@ -111,13 +112,25 @@ bool SafePathFinder::moveUnit(BWAPI::Position position, int frame) {
 	return false;
 }
 
+void SafePathFinder::visualizeData() {
+	if (GRID) showGrid();
+	if (PATH) showPath();
+
+	if (TERRAIN_DATA) {
+		drawTerrainData();
+		showPolygons();
+	}
+
+	if (ENEMY_RANGE) drawEnemiesAttackRange();
+}
+
 void SafePathFinder::showGrid() {
 	std::vector<Node*> nodes = map->getNodes();
 
 	for (unsigned int i = 0; i < nodes.size(); i++) {
 		int x = nodes[i]->getX() * Const::WALK_TILE;
 		int y = nodes[i]->getY() * Const::WALK_TILE;
-		if (nodes[i]->walkable) {
+		if (nodes[i]->isWalkable) {
 			Broodwar->drawBoxMap(x, y, x + Const::WALK_TILE, y + Const::WALK_TILE, BWAPI::Color(255, 255, 255), false);
 		} 
 		if (nodes[i]->occupied) {

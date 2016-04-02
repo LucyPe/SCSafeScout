@@ -7,7 +7,7 @@
 class Terrain {
 private:
 	BWAPI::Game* Broodwar;
-	std::vector<int> walkability;
+	std::vector<bool> walkability;
 	int height;
 	int width;
 
@@ -16,17 +16,17 @@ private:
 	
 	bool readTerrainData();
 	void saveTerrainData();
-	
+
+	bool pointInPolygon(int, int, BWTA::Polygon*);
+	bool walkable(int, int);
+
 public:
 	Terrain(BWAPI::Game*, int, int);
 	~Terrain();
-	bool pointInPolygon(int, int, BWTA::Polygon*);
 
-	int getWalkabilityData(int, int);
 	bool isWalkable(int, int);
 	bool isReachable(int, int, int, int);
 
 	void drawPolygons();
-
 };
 

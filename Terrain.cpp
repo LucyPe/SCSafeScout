@@ -7,7 +7,7 @@ Terrain::Terrain(BWAPI::Game* game, int w, int h) {
 	height = h;
 	width = w;
 
-	walkability = std::vector<int>();
+	walkability = std::vector<bool>();
 
 	if (!readTerrainData()) {
 
@@ -24,9 +24,9 @@ Terrain::Terrain(BWAPI::Game* game, int w, int h) {
 
 bool Terrain::readTerrainData() {
 	std::ifstream file;
-	file.open("bwapi-data/BWTA/" + Broodwar->mapHash() + ".txt", std::ofstream::in);
+	file.open(Const::PATH_MAP + Broodwar->mapHash(), std::ofstream::in);
 	if (file.is_open()) {
-		int input;
+		bool input;
 		for (int i = 0; i < height * width; i++) {
 			file >> input;
 			walkability.push_back(input);
@@ -40,11 +40,11 @@ bool Terrain::readTerrainData() {
 
 void Terrain::saveTerrainData() {
 	std::ofstream file;
-	file.open("bwapi-data/BWTA/" + Broodwar->mapHash() + ".txt", std::ofstream::out);
+	file.open(Const::PATH_MAP + Broodwar->mapHash(), std::ofstream::out);
 	if (file.is_open()) {
 		for (int h = 0; h < height; h++) {
 			for (int w = 0; w < width; w++) {
-				if (isWalkable(w, h)) walkability.push_back(1);
+				if (walkable(w, h)) walkability.push_back(1);
 				else walkability.push_back(0);
 				file << walkability.at(walkability.size() - 1) << " ";
 			}
@@ -74,13 +74,7 @@ bool Terrain::pointInPolygon(int walk_x, int walk_y, BWTA::Polygon* polygon) {
 	return false;
 }
 
-
-
-int Terrain::getWalkabilityData(int x, int y) {
-	return walkability[y * width + x];
-}
-
-bool Terrain::isWalkable(int x, int y) {
+bool Terrain::walkable(int x, int y) {
 	for (BWTA::Polygon pol : unwalkablePolygons) {
 		if (pointInPolygon(x, y, &pol)) {
 			for (BWTA::Polygon pol : regionsPolygons) {
@@ -92,15 +86,20 @@ bool Terrain::isWalkable(int x, int y) {
 	return true;
 }
 
+bool Terrain::isWalkable(int x, int y) {
+	return walkability[y * width + x];
+}
+
 bool Terrain::isReachable(int sx, int sy, int ex, int ey) {
-	if /*(getWalkabilityData(sx, sy) == 1 && (getWalkabilityData(ex, ey) == 1)
-		&& */(BWTA::isConnected(Utility::WalkToBuildPosition(sx),
+	if (isWalkable(sx, sy) && (isWalkable(ex, ey))
+		&& (BWTA::isConnected(Utility::WalkToBuildPosition(sx),
 			Utility::WalkToBuildPosition(sy),
 			Utility::WalkToBuildPosition(ex),
-			Utility::WalkToBuildPosition(ey)))/*)*/ return true;
+			Utility::WalkToBuildPosition(ey)))) return true;
 	return false;
 }
 
+/* draw regions (Green) and unwalkablePolygons(Orange) */
 void Terrain::drawPolygons() {
 	for (unsigned int p = 0; p < regionsPolygons.size(); p++) {
 		BWTA::Polygon pol = regionsPolygons.at(p);
@@ -115,28 +114,4 @@ void Terrain::drawPolygons() {
 			Broodwar->drawLineMap(pol.at(j), pol.at((j + 1) % pol.size()), BWAPI::Colors::Orange);
 		}
 	}
-
-	
-
-	//we will iterate through all the regions and draw the polygon outline of it in green.
-	/*int i = 3;
-	for (std::set<BWTA::Region*>::const_iterator r = BWTA::getRegions().begin(); r != BWTA::getRegions().end(); r++) {
-		BWTA::Polygon p = (*r)->getPolygon();
-		for (int j = 0; j<(int)p.size(); j++) {
-			BWAPI::Position point1 = p[j];
-			BWAPI::Position point2 = p[(j + 1) % p.size()];
-			Broodwar->drawLineMap(point1, point2, BWAPI::Colors::Red);
-		}
-		Broodwar->drawCircleMap((*r)->getCenter().x, (*r)->getCenter().y, i++, BWAPI::Colors::Purple, true);
-	}
-	i = 3;
-	for (BWTA::Polygon* p : BWTA::getUnwalkablePolygons()) {
-		for (int j = 0; j<(int)p->size(); j++) {
-			BWAPI::Position point1 = p->at(j);
-			BWAPI::Position point2 = p->at((j + 1) % p->size());
-			Broodwar->drawLineMap(point1 * WALK_TILE, point2*WALK_TILE, BWAPI::Colors::Green);
-		}
-		Broodwar->drawCircleMap(p->getCenter().x * WALK_TILE, p->getCenter().y * WALK_TILE, i++, BWAPI::Colors::Blue, true);
-	}*/
-
 }

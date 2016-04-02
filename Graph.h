@@ -21,11 +21,14 @@ private:
 
 	int const WALK_MAX_RANGE = Utility::PositionToWalkPosition((int)Const::MAX_RANGE);
 
+	// A*
 	std::map<std::pair<int, int>, Node*> open_pos;
 	std::multimap<double, Node*> open_f;
 	std::map<std::pair<int, int>, Node*> closed;
 	
-	std::map<BWAPI::UnitInterface*, double> lastStates;
+	//LEARNING 
+	BWAPI::UnitInterface* enemy;
+	double last_state;
 
 	void initNodes();
 	void deleteNodes();

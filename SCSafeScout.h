@@ -32,4 +32,5 @@ public:
   bool ignoreUnit(BWAPI::Unit);
   bool setScout();
   bool hasScout();
+  void displayGui();
 };
