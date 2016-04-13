@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿
+#pragma once
 #include "RBF.h"
 #include "../Utility.h"
 #include "../Const.h"

@@ -11,16 +11,27 @@ UnitInterface* scout;
 
 Position position;
 
+int position_count = 0;
+bool side = true;
+
 void SCSafeScout::onStart() {
 	//CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
 	BWTA::analyze();
 	BWTA::readMap();
 	
+	std::ifstream file;
+	file.open(Const::PATH_TEMP);
+
+	if (file.is_open()) {
+		file >> position_count;
+		file.close();
+	}
+
 	pathfinder = new SafePathFinder(BroodwarPtr);
 
 	scout = NULL;
 	if (Const::MODE == 0) {
-		position = Utility::getTrainPosition(&Const::SIDE);
+		position = Utility::getTrainPosition(&side);
 		pathfinder->LEARNING = true;
 	}
 	else {
@@ -36,14 +47,7 @@ void SCSafeScout::onStart() {
 		Broodwar->setGUI(false);
 	}
 
-	std::ifstream file;
-	file.open(Const::PATH_TEMP);
-
-	if (file.is_open()) {
-		file >> Const::ITERATION >> Const::POSITION_COUNT;
-		file.close();
-	}
-
+	
 	// BWAPI returns std::string when retrieving a string, don't forget to add .c_str() when printing!
 	//Broodwar << "The map is " << Broodwar->mapWidth() << " x " << Broodwar->mapHeight()  << std::endl;
 	//Broodwar->enableFlag(Flag::CompleteMapInformation);
@@ -56,7 +60,7 @@ void SCSafeScout::onEnd(bool isWinner) {
 	std::ofstream file;
 	file.open(Const::PATH_TEMP);
 	if (file.is_open()) {
-		file << Const::ITERATION << " " << Const::POSITION_COUNT;
+		file << position_count;
 		file.close();
 	}
 
@@ -83,23 +87,9 @@ void SCSafeScout::onFrame() {
 		if (pathfinder->MOVE) {
 			if (!pathfinder->moveUnit(position)){
 				if (Const::MODE == 0) {
-					position = Utility::getTrainPosition(&Const::SIDE);
+					position = Utility::getTrainPosition(&side);
 					pathfinder->changePosition(position);
-					Const::POSITION_COUNT++;
-
-					if (Const::POSITION_COUNT == 1000) {
-						Const::ITERATION++;
-						Const::GAMMA += 0.5;
-						if (Const::GAMMA == 1) {
-							Const::ALPHA += 0.05;
-							Const::GAMMA = 0.7;
-						}
-						if (Const::ALPHA >= 0.3) {
-							onEnd(false);
-							Broodwar->pauseGame();
-						}
-						Broodwar->restartGame();
-					}
+					position_count++;
 				}	
 			}
 		}
@@ -234,7 +224,7 @@ DWORD WINAPI AnalyzeThread() {
 
 //other
 bool SCSafeScout::ignoreUnit(BWAPI::Unit u) {
-	if (Const::MODE == 1 && !u->getType().isWorker()) return true;
+	if (!u->getType().isWorker()) return true;
 	//if (u->getType() != BWAPI::UnitTypes::Protoss_Dragoon) return true;
 	if (!u->exists()) return true;
 	if (u->isLockedDown() || u->isMaelstrommed() || u->isStasised()) return true;
@@ -266,7 +256,7 @@ void SCSafeScout::displayGui() {
 	// Display the game frame rate as text in the upper left area of the screen
 	Broodwar->drawTextScreen(200, 0, "FPS: %d", Broodwar->getFPS());
 	Broodwar->drawTextScreen(200, 20, "Average FPS: %f", Broodwar->getAverageFPS());
-	Broodwar->drawTextScreen(200, 40, "Position %d", Const::POSITION_COUNT);
+	Broodwar->drawTextScreen(200, 40, "Position %d", position_count);
 	Broodwar->drawTextScreen(200, 60, "Frame %d", Broodwar->getFrameCount());
 	Broodwar->drawTextScreen(200, 80, "Path %d", pathfinder->pathLenght());
 	/*

@@ -41,7 +41,8 @@ public:
 
 	/* Model Params */
 	bool LEARNING = true;
-	
+
+
 	/**/
 
 	void setUnit(BWAPI::UnitInterface*, double);

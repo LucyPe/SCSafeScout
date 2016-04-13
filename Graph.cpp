@@ -29,7 +29,7 @@ Graph::~Graph() {
 	// delete danger functions
 	for (std::map<BWAPI::UnitType, DangerFunction*>::iterator itr = dangerFunctions.begin(); itr != dangerFunctions.end(); ++itr) {
 		// save visualization to file
-		itr->second->visualize(itr->first.toString() + ".dat", false);
+		itr->second->visualize(Const::PATH_DF + itr->first.toString() + ".dat", false);
 		delete(itr->second);
 		dangerFunctions.erase(itr);
 	}
@@ -112,7 +112,14 @@ void Graph::setNodeNeigbours(int w, int h) {
 void Graph::createEdge(int from, int index, int w, int h) {
 	int to = getIndex(w, h);
 	map[from]->setNeighbour(index, map[to]);
-	map[from]->setTerrainCost(index, Utility::distance(map[from]->getPosition(), map[to]->getPosition()));
+	//map[from]->setTerrainCost(index, Utility::distance(map[from]->getPosition(), map[to]->getPosition()));
+	if (abs(map[from]->getPosition().first - map[to]->getPosition().first) == abs(map[from]->getPosition().second - map[to]->getPosition().second)) {
+		map[from]->setTerrainCost(index, 1.5);
+
+	} else {
+		map[from]->setTerrainCost(index,1.0);
+
+	}
 }
 
 //FUNCTIONS
@@ -162,14 +169,15 @@ void Graph::resetWalkability() {
 
 DangerFunction* Graph::getDangerFunction(BWAPI::UnitType enemyType) {
 	if (dangerFunctions.find(enemyType) == dangerFunctions.end()) {
+		string path = Const::PATH_FA + enemyType.toString() + ".txt";
 		switch (Const::MODEL) {
 			case 1:
 				dangerFunctions[enemyType] = new ActualDangerFunction(enemyType,
-					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::PATH_FA + enemyType.toString(), true));
+					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, path, true));
 				break;
 			case 2:
 				dangerFunctions[enemyType] = new RLDangerFunction(enemyType,
-					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, Const::PATH_FA + enemyType.toString(), true));
+					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, path, true));
 				break;
 			default:
 				dangerFunctions[enemyType] = new ComputedDangerFunction(enemyType);
