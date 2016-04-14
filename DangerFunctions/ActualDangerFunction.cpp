@@ -3,17 +3,13 @@
 #include "../Const.h"
 #include "../Utility.h"
 
-ActualDangerFunction::ActualDangerFunction(BWAPI::UnitType enemy, FunctionApproximator* fApprox) : DangerFunction(enemy) {
+ActualDangerFunction::ActualDangerFunction(BWAPI::UnitType enemy, RBF* fApprox) : DangerFunction(enemy) {
 	FA = fApprox;
 }
 
 ActualDangerFunction::~ActualDangerFunction() {
 	FA->saveToFile();
 	delete(FA);
-}
-
-vector<double> ActualDangerFunction::createInput(double dist) {
-	return vector<double>(1, dist / Const::MAX_RANGE);
 }
 
 void ActualDangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
@@ -24,11 +20,11 @@ void ActualDangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 void ActualDangerFunction::learn(double dist, double = 0) {
 	if (unitPtr != NULL) {
 		double actualHp = (unitPtr->getHitPoints() + unitPtr->getShields());
-		vector<double> input = createInput(dist);
-		vector<double> output = FA->compute(input);
-		vector<double> target = vector<double>(1, ((hp - actualHp)/* / maxHp*/));
+		double input = createInput(dist);
+		double output = FA->compute(input);
+		double target = (hp - actualHp);
 				
-		if (FA->error(target, output)[0] != 0) {
+		if (FA->error(target, output) != 0) {
 			FA->adjust(input, output, target);
 			DangerFunction::visualize(std::to_string(Const::MODEL) + "_" + "Zerg_Hydralisk" + ".dat", false);
 		}
@@ -41,6 +37,6 @@ void ActualDangerFunction::learn(double dist, double = 0) {
 }
 
 double ActualDangerFunction::compute(double dist) {
-	double result = FA->compute(createInput(dist)).at(0);
+	double result = FA->compute(createInput(dist));
 	return result;
 }

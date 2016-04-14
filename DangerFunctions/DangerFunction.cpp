@@ -18,6 +18,10 @@ void DangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 	unitPtr = unit;
 }
 
+double DangerFunction::createInput(double x) {
+	return (x / Const::MAX_RANGE);
+}
+
 void DangerFunction::visualize(string fileName, bool append) {
 	ofstream output;
 	if (append) output.open(fileName, std::ofstream::out | std::ofstream::app);

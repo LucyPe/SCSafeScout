@@ -1,20 +1,17 @@
 #pragma once
-#include "../FunctionApproximators/FunctionApproximator.h"
 #include "DangerFunction.h"
+#include "RBF.h"
 
 class ActualDangerFunction : public DangerFunction {
 
 private:
-	FunctionApproximator* FA;
+	RBF* FA;
 
 	//current hp
 	double hp;
 
-	// method for converting input to vector
-	vector<double> createInput(double);
-
 public:
-	ActualDangerFunction(BWAPI::UnitType, FunctionApproximator*);
+	ActualDangerFunction(BWAPI::UnitType, RBF*);
 	~ActualDangerFunction();
 
 	void setUnitPtr(BWAPI::UnitInterface*);

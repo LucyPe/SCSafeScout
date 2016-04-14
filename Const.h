@@ -23,7 +23,6 @@ namespace Const {
 	const int PATH_UPDATE_FRAME_RATE = 5;
 
 	/* Neural Networks variables */
-	const int NEURONS = 5;
 	const int CENTERS = 20;
 
 	const double ALPHA = 0.02;

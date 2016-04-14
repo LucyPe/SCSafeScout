@@ -12,6 +12,8 @@ protected:
 	// pointer for agent unit
 	BWAPI::UnitInterface* unitPtr;
 
+	double createInput(double);
+
 public:
 	DangerFunction(BWAPI::UnitType);
 	virtual ~DangerFunction();

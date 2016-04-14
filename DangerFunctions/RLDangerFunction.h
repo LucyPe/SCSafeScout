@@ -1,17 +1,16 @@
 #pragma once
 #include "DangerFunction.h"
-#include "../FunctionApproximators/FunctionApproximator.h"
+#include "RBF.h"
 
 class RLDangerFunction : public DangerFunction {
 
 private: 
-	FunctionApproximator* FA;
+	RBF* FA;
 
 	double hp;
-	vector<double> createInput(double);
 
 public:
-	RLDangerFunction(BWAPI::UnitType, FunctionApproximator*);
+	RLDangerFunction(BWAPI::UnitType, RBF*);
 	~RLDangerFunction();
 
 	void setUnitPtr(BWAPI::UnitInterface*);

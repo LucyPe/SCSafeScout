@@ -4,9 +4,7 @@
 #include "DangerFunctions/ComputedDangerFunction.h"
 #include "DangerFunctions/ActualDangerFunction.h"
 #include "DangerFunctions/RLDangerFunction.h"
-#include "FunctionApproximators/FunctionApproximator.h"
-#include "FunctionApproximators/MLP.h"
-#include "FunctionApproximators/RBF.h"
+#include "DangerFunctions/RBF.h"
 
 Graph::Graph(BWAPI::Game* g) {
 	Broodwar = g;
@@ -114,10 +112,10 @@ void Graph::createEdge(int from, int index, int w, int h) {
 	map[from]->setNeighbour(index, map[to]);
 	//map[from]->setTerrainCost(index, Utility::distance(map[from]->getPosition(), map[to]->getPosition()));
 	if (abs(map[from]->getPosition().first - map[to]->getPosition().first) == abs(map[from]->getPosition().second - map[to]->getPosition().second)) {
-		map[from]->setTerrainCost(index, 1.5);
+		map[from]->setTerrainCost(index, sqrt(2));
 
 	} else {
-		map[from]->setTerrainCost(index,1.0);
+		map[from]->setTerrainCost(index, 1.0);
 
 	}
 }
@@ -173,11 +171,11 @@ DangerFunction* Graph::getDangerFunction(BWAPI::UnitType enemyType) {
 		switch (Const::MODEL) {
 			case 1:
 				dangerFunctions[enemyType] = new ActualDangerFunction(enemyType,
-					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, path, true));
+					new RBF(Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, path));
 				break;
 			case 2:
 				dangerFunctions[enemyType] = new RLDangerFunction(enemyType,
-					new RBF(1, 1, Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, path, true));
+					new RBF(Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, path));
 				break;
 			default:
 				dangerFunctions[enemyType] = new ComputedDangerFunction(enemyType);
