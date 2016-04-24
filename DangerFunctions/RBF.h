@@ -32,6 +32,6 @@ public:
 	// params: target, output
 	double error(double, double);
 	// params: input, output, target
-	void adjust(double, double, double);
+	void adjust(double, double);
 };
 

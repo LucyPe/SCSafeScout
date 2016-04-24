@@ -26,6 +26,9 @@ namespace Utility {
 	BWAPI::Position getTrainPosition(bool*);
 
 	//file
-	void printToFile(std::string file, std::string line);
-	void printToFile(std::fstream* file, std::string line);
+	void printToFile(std::string, int);
+	void printToFile(std::string, std::string line);
+	void printToFile(std::fstream*, std::string line);
+
+	void readFromFile(std::string, int*);
 }

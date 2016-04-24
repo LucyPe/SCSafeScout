@@ -78,8 +78,8 @@ bool Terrain::walkable(int x, int y) {
 	for (BWTA::Polygon pol : unwalkablePolygons) {
 		if (pointInPolygon(x, y, &pol)) {
 			for (BWTA::Polygon pol : regionsPolygons) {
-				if (pointInPolygon(x * Const::WALK_TILE, y * Const::WALK_TILE, &pol)) return true;
-			}	
+				if (pointInPolygon(x * Const::WALK_TILE, y * Const::WALK_TILE, &pol)) return false;
+			}
 			return false;
 		}
 	}
@@ -92,10 +92,10 @@ bool Terrain::isWalkable(int x, int y) {
 
 bool Terrain::isReachable(int sx, int sy, int ex, int ey) {
 	if (isWalkable(sx, sy) && (isWalkable(ex, ey))
-		&& (BWTA::isConnected(Utility::WalkToBuildPosition(sx),
+		/*&& (BWTA::isConnected(Utility::WalkToBuildPosition(sx),
 			Utility::WalkToBuildPosition(sy),
 			Utility::WalkToBuildPosition(ex),
-			Utility::WalkToBuildPosition(ey)))) return true;
+			Utility::WalkToBuildPosition(ey)))*/) return true;
 	return false;
 }
 
@@ -111,7 +111,7 @@ void Terrain::drawPolygons() {
 	for (unsigned int p = 0; p < unwalkablePolygons.size(); p++) {
 		BWTA::Polygon pol = unwalkablePolygons.at(p);
 		for (int j = 0; j< (int)pol.size(); j++) {
-			Broodwar->drawLineMap(pol.at(j), pol.at((j + 1) % pol.size()), BWAPI::Colors::Orange);
+			Broodwar->drawLineMap(pol.at(j) * 8, pol.at((j + 1) % pol.size()) * 8, BWAPI::Colors::Orange);
 		}
 	}
 }

@@ -20,7 +20,6 @@ private:
 
 	void showGrid();
 	void showPath();
-	void showPolygons();
 	void drawTerrainData();
 	void drawEnemiesAttackRange();
 	
@@ -30,7 +29,8 @@ public:
 
 	/* params */
 	double dangerWeight = -1;
-	
+	int POSITIONS = 1;
+
 	/* Gui Params */
 	bool GRID = false;
 	bool PATH = true;
@@ -42,10 +42,11 @@ public:
 	/* Model Params */
 	bool LEARNING = true;
 
-
 	/**/
 
-	void setUnit(BWAPI::UnitInterface*, double);
+	void setUnit(BWAPI::UnitInterface*);
+	int getUnitHP();
+	BWAPI::Position getUnitPosition();
 
 	int pathLenght();
 	void changePosition(BWAPI::Position);

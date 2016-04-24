@@ -12,6 +12,8 @@ protected:
 	// pointer for agent unit
 	BWAPI::UnitInterface* unitPtr;
 
+	double maxHp;
+
 	double createInput(double);
 
 public:

@@ -25,8 +25,8 @@ void ActualDangerFunction::learn(double dist, double = 0) {
 		double target = (hp - actualHp);
 				
 		if (FA->error(target, output) != 0) {
-			FA->adjust(input, output, target);
-			DangerFunction::visualize(std::to_string(Const::MODEL) + "_" + "Zerg_Hydralisk" + ".dat", false);
+			FA->adjust(output, target);
+			DangerFunction::visualize(Const::PATH_WRITE + (string) "DF_tmp.dat", false);
 		}
 
 		hp = actualHp;

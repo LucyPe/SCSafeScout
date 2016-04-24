@@ -4,9 +4,9 @@
 #include "../Utility.h"
 
 double ComputedDangerFunction::dmgTable[3][3] = {
-	{ 1.0, 1.0, 0.5 },
-	{ 0.5, 1.0, 0.75 },
-	{ 0.75, 1.0, 1.0 }
+	{ 1.0, 1.0, 0.5 },	//SMALL
+	{ 0.5, 1.0, 0.75 }, //NORMAL
+	{ 0.75, 1.0, 1.0 }	//LARGE
 };
 
 ComputedDangerFunction::ComputedDangerFunction(BWAPI::UnitType enemy) : DangerFunction(enemy) {
@@ -41,8 +41,8 @@ double ComputedDangerFunction::dmgFactor(int index) {
 	else if (size == BWAPI::UnitSizeTypes::Large) x = 2;
 	else x = 1;
 
-	if (size == BWAPI::DamageTypes::Concussive) y = 0;
-	else if (size == BWAPI::DamageTypes::Explosive) y = 2;
+	if (dmgType == BWAPI::DamageTypes::Concussive) y = 0;
+	else if (dmgType == BWAPI::DamageTypes::Explosive) y = 2;
 	else y = 1;
 
 	return dmgTable[x][y];

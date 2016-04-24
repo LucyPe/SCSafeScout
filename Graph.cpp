@@ -11,7 +11,7 @@ Graph::Graph(BWAPI::Game* g) {
 	unit = NULL;
 	// mapHeight() and mapWidth() in build tiles
 	height = Broodwar->mapHeight() * 4 - 4;
-	width = Broodwar->mapWidth() * 4;
+	width = Broodwar->mapWidth() * 4 - 2;
 
 	terrain = new Terrain(g, width, height);
 	map = std::vector<Node*>();
@@ -110,14 +110,7 @@ void Graph::setNodeNeigbours(int w, int h) {
 void Graph::createEdge(int from, int index, int w, int h) {
 	int to = getIndex(w, h);
 	map[from]->setNeighbour(index, map[to]);
-	//map[from]->setTerrainCost(index, Utility::distance(map[from]->getPosition(), map[to]->getPosition()));
-	if (abs(map[from]->getPosition().first - map[to]->getPosition().first) == abs(map[from]->getPosition().second - map[to]->getPosition().second)) {
-		map[from]->setTerrainCost(index, sqrt(2));
-
-	} else {
-		map[from]->setTerrainCost(index, 1.0);
-
-	}
+	map[from]->setTerrainCost(index, Utility::distance(map[from]->getPosition(), map[to]->getPosition()));
 }
 
 //FUNCTIONS
@@ -142,12 +135,13 @@ void Graph::resetWalkability() {
 		for (unsigned int i = 0; i < map.size(); i++) {
 
 			if (map[i]->isWalkable) {
-				int size = Utility::PositionToWalkPosition(max(unitType.height(), unitType.width())/2) + 1;
+				int unit_height = Utility::PositionToWalkPosition(unitType.height())/2 + 1;
+				int unit_witdh = Utility::PositionToWalkPosition(unitType.width())/2 + 1;
 
-				int pos_x_start = max(0, map[i]->getX() - size);
-				int pos_y_start = max(0, map[i]->getY() - size);
-				int pos_x_end = min(width - 1, map[i]->getX() + size);
-				int pos_y_end = min(height - 1, map[i]->getY() + size);
+				int pos_x_start = max(0, map[i]->getX() - unit_witdh);
+				int pos_y_start = max(0, map[i]->getY() - unit_height);
+				int pos_x_end = min(width - 1, map[i]->getX() + unit_witdh);
+				int pos_y_end = min(height - 1, map[i]->getY() + unit_height);
 
 				for (int x = pos_x_start; x <= pos_x_end; x++) {
 					for (int y = pos_y_start; y <= pos_y_end; y++) {
@@ -169,6 +163,9 @@ DangerFunction* Graph::getDangerFunction(BWAPI::UnitType enemyType) {
 	if (dangerFunctions.find(enemyType) == dangerFunctions.end()) {
 		string path = Const::PATH_FA + enemyType.toString() + ".txt";
 		switch (Const::MODEL) {
+			case 0: 
+				dangerFunctions[enemyType] = new ComputedDangerFunction(enemyType);
+				break;
 			case 1:
 				dangerFunctions[enemyType] = new ActualDangerFunction(enemyType,
 					new RBF(Const::CENTERS, Const::ALPHA, Const::SIGMA, 0.0, Const::RADIUS, path));
@@ -233,10 +230,10 @@ void Graph::updateUnits() {
 
 // disable Nodes under all units
 void Graph::updateWalkability(BWAPI::UnitInterface* unit) {
-	int pos_x_start = Utility::PositionToWalkPosition(unit->getLeft() - unitType.dimensionRight() + 1);
-	int pos_y_start = Utility::PositionToWalkPosition(unit->getTop() - unitType.dimensionDown() + 1);
-	int pos_x_end = Utility::PositionToWalkPosition(unit->getRight() + unitType.dimensionLeft() - 1);
-	int pos_y_end = Utility::PositionToWalkPosition(unit->getBottom() + unitType.dimensionUp() - 1);
+	int pos_x_start = Utility::PositionToWalkPosition(unit->getLeft() - unitType.dimensionRight()) - 2;
+	int pos_y_start = Utility::PositionToWalkPosition(unit->getTop() - unitType.dimensionDown() - 2);
+	int pos_x_end = Utility::PositionToWalkPosition(unit->getRight() + unitType.dimensionLeft() + 2);
+	int pos_y_end = Utility::PositionToWalkPosition(unit->getBottom() + unitType.dimensionUp() + 2);
 
 	for (int x = pos_x_start; x < pos_x_end; x++) {
 		for (int y = pos_y_start; y < pos_y_end; y++) {
@@ -265,9 +262,13 @@ void Graph::updateDanger(BWAPI::UnitInterface* enemy) {
 	for (int x = pos_x_start; x <= pos_x_end; x++) {
 		for (int y = pos_y_start; y <= pos_y_end; y++) {
 			int index = getIndex(x, y);
-			if (existsNode(map[index])) {
+			if (existsNode(map[index]) && Const::MODEL != -1) {
 				double dist = Utility::distance(x, y, pos_x, pos_y) * Const::WALK_TILE;
-				map[getIndex(x, y)]->addDangerCost(max(0.0, getDangerFunction(enemyType)->compute(dist)));
+
+				double danger = getDangerFunction(enemyType)->compute(dist);
+				if (danger < 0.00001) danger = 0;
+
+				map[getIndex(x, y)]->addDangerCost(max(0.0, danger));
 			}
 		}
 	}
@@ -295,15 +296,17 @@ std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, 
 	std::pair<int, int> start = std::pair<int, int>(Utility::PositionToWalkPosition(s.x), Utility::PositionToWalkPosition(s.y));
 	std::pair<int, int> end = std::pair<int, int>(Utility::PositionToWalkPosition(e.x), Utility::PositionToWalkPosition(e.y));
  
-	Node* snode = map[getIndex(start.first, start.second)];
+	int start_index = getIndex(start.first, start.second);
 	// check if exists a path
-	if (!unitType.isFlyer() && !terrain->isReachable(start.first, start.second, end.first, end.second)) {
+
+	if (start_index < 0 || start_index >= map.size() || 
+		(!unitType.isFlyer() && !terrain->isReachable(start.first, start.second, end.first, end.second))) {
 		Broodwar->sendText("no path");
 		return std::vector<BWAPI::Position>();
 	}
 
 	// init start node
-	
+	Node* snode = map[start_index];	
 	snode->g = 0;
 	snode->f = Utility::distance(start, end);
 	open_f.insert(std::pair<double, Node*>(snode->f, snode));

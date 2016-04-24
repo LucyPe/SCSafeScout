@@ -15,6 +15,7 @@ RLDangerFunction::~RLDangerFunction() {
 void RLDangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 	DangerFunction::setUnitPtr(unit);
 	hp = (unitPtr->getHitPoints() + unitPtr->getShields());
+	maxHp = 40;
 }
 
 void RLDangerFunction::learn(double dist, double new_dist) {
@@ -27,14 +28,12 @@ void RLDangerFunction::learn(double dist, double new_dist) {
 		double new_output = FA->compute(new_state);
 		double last_output = FA->compute(last_state);
 
-		//Utility::printToFile(Const::PATH_ERROR, std::to_string(hp) + " " + std::to_string(maxHp));
-
 		double target = (hp - actualHp) + Const::GAMMA * new_output;
 
 		//if ((hp - actualHp) != 0) Utility::printToFile(Const::PATH_DEBUG, std::to_string(dist) + " " + std::to_string(new_dist));
 
 		if (FA->error(target, last_output) != 0) {
-			FA->adjust(last_state, last_output, target);
+			FA->adjust(last_output, target);
 			//Utility::printToFile(Const::PATH_DEBUG, std::to_string(dist) + " " + std::to_string(new_dist) + " " + std::to_string(new_output));
 			DangerFunction::visualize(Const::PATH_WRITE + (string) "DF_tmp.dat", false);
 		}

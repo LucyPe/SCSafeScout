@@ -16,6 +16,7 @@ BWAPI::UnitType DangerFunction::getEnemyType() {
 
 void DangerFunction::setUnitPtr(BWAPI::UnitInterface* unit) {
 	unitPtr = unit;
+	maxHp = unit->getHitPoints() + unit->getShields();
 }
 
 double DangerFunction::createInput(double x) {

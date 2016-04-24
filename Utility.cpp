@@ -87,6 +87,23 @@ void Utility::printToFile(std::string fileName, std::string line) {
 	file.close();
 }
 
+void Utility::printToFile(std::string fileName, int x) {
+	std::ofstream file;
+	file.open(fileName, std::ofstream::out);
+	file << x << std::endl;
+	file.close();
+}
+
 void Utility::printToFile(std::fstream* file, std::string line) {
 	(*file) << line << std::endl;
+}
+
+void Utility::readFromFile(std::string fileName, int* x) {
+	std::ifstream file;
+	file.open(fileName);
+
+	if (file.is_open()) {
+		file >> (*x);
+		file.close();
+	}
 }

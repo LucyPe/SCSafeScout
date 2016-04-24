@@ -19,35 +19,36 @@ void SCSafeScout::onStart() {
 	BWTA::analyze();
 	BWTA::readMap();
 	
-	std::ifstream file;
-	file.open(Const::PATH_TEMP);
-
-	if (file.is_open()) {
-		file >> position_count;
-		file.close();
-	}
-
 	pathfinder = new SafePathFinder(BroodwarPtr);
-
 	scout = NULL;
-	if (Const::MODE == 0) {
-		position = Utility::getTrainPosition(&side);
-		pathfinder->LEARNING = true;
-	}
-	else {
-		position = BWAPI::Position(1090, 100);
-		position.makeValid();
-		pathfinder->LEARNING = false;
-	}
-	
-	Broodwar->sendText("%s", "Black sheep wall");
 
 	if (pathfinder->NO_GUI) {
 		Broodwar->setLocalSpeed(0);
 		Broodwar->setGUI(false);
 	}
 
+	switch (Const::MODE) {
+		case 0:
+			Utility::readFromFile(Const::PATH_TEMP, &position_count);
+			position = Utility::getTrainPosition(&side);
+			pathfinder->LEARNING = true;
+			//pathfinder->LEARNING = false;
+			break;
+		case 1:
+			position = BWAPI::Position(1090, 100);
+			pathfinder->LEARNING = false;
+			Broodwar->setLocalSpeed(20);
+			break;
+		case 2:
+			position = Const::TEST_POSITION;
+			pathfinder->LEARNING = false;
+			break;
+	}
 	
+	Broodwar->sendText("%s", "Black sheep wall");
+
+
+
 	// BWAPI returns std::string when retrieving a string, don't forget to add .c_str() when printing!
 	//Broodwar << "The map is " << Broodwar->mapWidth() << " x " << Broodwar->mapHeight()  << std::endl;
 	//Broodwar->enableFlag(Flag::CompleteMapInformation);
@@ -57,12 +58,11 @@ void SCSafeScout::onStart() {
 }
 
 void SCSafeScout::onEnd(bool isWinner) {
-	std::ofstream file;
-	file.open(Const::PATH_TEMP);
-	if (file.is_open()) {
-		file << position_count;
-		file.close();
-	}
+	if (Const::MODE == 0) {
+		Utility::printToFile(Const::PATH_TEMP, position_count);
+	} /*else if (Const::MODE == 2) {
+		Utility::printToFile(Const::PATH_WRITE + Const::MODEL + (string) "_data.txt", " " + std::to_string(Broodwar->getFrameCount()));
+	}*/
 
 	delete(pathfinder);
 	BWTA::cleanMemory();
@@ -82,16 +82,27 @@ void SCSafeScout::onFrame() {
 			position = Utility::getMousePosition(BroodwarPtr);
 			pathfinder->changePosition(position);
 		}
-
 		// move
 		if (pathfinder->MOVE) {
 			if (!pathfinder->moveUnit(position)){
 				if (Const::MODE == 0) {
 					position = Utility::getTrainPosition(&side);
-					pathfinder->changePosition(position);
-					position_count++;
-				}	
-			}
+					position_count++;					
+					pathfinder->changePosition(position);	
+
+					if (position_count >= pathfinder->POSITIONS) {
+						Broodwar->setLocalSpeed(-1);
+						Broodwar->pauseGame();
+					}
+				} else if (Const::MODE == 2) {
+					BWAPI::Position current_position = pathfinder->getUnitPosition();
+					if (Utility::PositionInRange(Const::TEST_POSITION, current_position, Const::WALK_TILE * 10)) {
+						Utility::printToFile(Const::PATH_DATA,std::to_string(Broodwar->getFrameCount()) + " " + std::to_string(pathfinder->getUnitHP()));
+						Broodwar->setLocalSpeed(-1);
+						Broodwar->pauseGame();
+					}
+				}
+			} 
 		}
 	}
 }
@@ -121,24 +132,14 @@ void SCSafeScout::onSendText(std::string text) {
 			Broodwar->setLocalSpeed(-1);
 			Broodwar->setGUI(true);
 		}
-	} else if (text == "l") {
-		pathfinder->LEARNING = !pathfinder->LEARNING;
 	} else if (text == "r") {
 		position = Utility::getRandomPosition(Broodwar->mapWidth(), Broodwar->mapHeight());
 		pathfinder->changePosition(position);		
-	} else if (text == "p") {
-		pathfinder->changePosition(position);
 	} else if (text == "q") {
 		Broodwar->restartGame();
 	} else if (text == "f") {
 		text = "Black sheep wall";
 		Broodwar->sendText("%s", text.c_str());
-	} else if (text == "+") {
-		pathfinder->dangerWeight += 0.1;
-		Broodwar->sendText("%d", (int) (pathfinder->dangerWeight * 10));
-	} else if (text == "-") {
-		pathfinder->dangerWeight -= 0.1;
-		Broodwar->sendText("%d", (int) (pathfinder->dangerWeight * 10));
 	} else {
 		Broodwar->sendText("%s", text.c_str());
 	}
@@ -245,7 +246,7 @@ bool SCSafeScout::setScout() {
 
 		if (!u->getType().isBuilding()) {
 			scout = u;
-			pathfinder->setUnit(scout, Const::DANGER_WEIGTH);
+			pathfinder->setUnit(scout);
 			return true;
 		}
 	}
@@ -259,11 +260,11 @@ void SCSafeScout::displayGui() {
 	Broodwar->drawTextScreen(200, 40, "Position %d", position_count);
 	Broodwar->drawTextScreen(200, 60, "Frame %d", Broodwar->getFrameCount());
 	Broodwar->drawTextScreen(200, 80, "Path %d", pathfinder->pathLenght());
-	/*
+	
 	Broodwar->drawTextScreen(10, 0, "X: %d", Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x);
 	Broodwar->drawTextScreen(10, 20, "Y: %d", Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y);
 
 	Broodwar->drawTextScreen(10, 40, "XT: %d", (int)floor(((double)(((Broodwar->getScreenPosition().x + Broodwar->getMousePosition().x)) / 32)) + 0.5));
 	Broodwar->drawTextScreen(10, 60, "YT: %d", (int)floor(((double)(((Broodwar->getScreenPosition().y + Broodwar->getMousePosition().y)) / 32)) + 0.5));
-	*/
+	
 }

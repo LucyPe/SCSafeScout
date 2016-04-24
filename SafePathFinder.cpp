@@ -7,6 +7,7 @@ SafePathFinder::SafePathFinder(BWAPI::Game* g) {
 	path = std::vector<BWAPI::Position>();
 	map = new Graph(g);
 	unit = NULL;
+	dangerWeight = 1;
 	loadParams();
 }
 
@@ -15,13 +16,13 @@ SafePathFinder::~SafePathFinder() {
 	delete(map);
 }
 
-void SafePathFinder::loadParams(){
+void SafePathFinder::loadParams() {
 	std::ifstream file;
 	file.open(Const::PATH_WRITE + (string)"params.txt");
 
 	if (file.is_open()) {
-		file >> GRID >> PATH >> MOVE >> NO_GUI >> TERRAIN_DATA >> ENEMY_RANGE;
-		file >> dangerWeight;
+		file >> NO_GUI >> GRID >> MOVE >> PATH >> TERRAIN_DATA >> ENEMY_RANGE;
+		file >> POSITIONS >> dangerWeight;
 		file.close();
 	}
 }
@@ -31,17 +32,26 @@ void SafePathFinder::saveParams(){
 	file.open(Const::PATH_WRITE + (string)"params.txt");
 
 	if (file.is_open()) {
-		file << GRID << " " << PATH << " " << MOVE << " " << NO_GUI << " " << TERRAIN_DATA << " " << ENEMY_RANGE << endl;
+		file << NO_GUI << " " << GRID << " " << MOVE << " " << PATH << " " << TERRAIN_DATA << " " << ENEMY_RANGE << endl;
+		file << POSITIONS << endl;
 		file << dangerWeight << endl;
 		file.close();
 	}
 }
 
 
-void SafePathFinder::setUnit(BWAPI::UnitInterface* u, double w) {
+void SafePathFinder::setUnit(BWAPI::UnitInterface* u) {
 	unit = u;
-	if (dangerWeight == -1) dangerWeight = w;
+	if (dangerWeight == -1) 
 	map->setUnitPointer(unit);
+}
+
+int SafePathFinder::getUnitHP() {
+	return unit->getHitPoints();
+}
+
+BWAPI::Position SafePathFinder::getUnitPosition() {
+	return unit->getPosition();
 }
 
 bool SafePathFinder::existPath() {
@@ -78,34 +88,33 @@ void SafePathFinder::changePosition(BWAPI::Position position) {
 	}
 }
 
-
 bool SafePathFinder::moveUnit(BWAPI::Position position) {
 	if (unit != NULL) {
 		BWAPI::Unitset enemies = unit->getUnitsInRadius(Const::MAX_RANGE);
 		BWAPI::Position unitPosition = unit->getPosition();
-		if (existPath()) {			
+		if (existPath()) {	
+			//move to next position
 			unit->move(nextPosition());
 			if (Utility::PositionInRange(nextPosition(), unitPosition, Const::WALK_TILE * 10)) {
+				
 				path.pop_back();
 			
 				int frame = Broodwar->getFrameCount();
 				// update FA
-				if (LEARNING && (frame % Const::LEARNING_FRAME_RATE == 0)) map->updateDangerFunctions();
+				if ((Const::MODE == 0) && (frame % Const::LEARNING_FRAME_RATE == 0)) {
+					map->updateDangerFunctions();
+				}
 				
 				// if enemy is near -> recalculate path
 				if (!enemies.empty() || (frame % Const::PATH_UPDATE_FRAME_RATE == 0))  {
 					findPath(unitPosition, position);
 				}
 			}			
-			/*if (Const::LEARNING && (path.size() <= 3)) {
-				Broodwar->restartGame();
-			}*/
 			return true;			
 		}
 		else {
 			findPath(unitPosition, position);
-		}
-		
+		}		
 	} else {
 		Utility::printToFile(Const::PATH_ERROR, "SafePathFinder::moveUnit - no unit pointer");
 	}
@@ -118,7 +127,7 @@ void SafePathFinder::visualizeData() {
 
 	if (TERRAIN_DATA) {
 		drawTerrainData();
-		showPolygons();
+		map->getTerrain()->drawPolygons();
 	}
 
 	if (ENEMY_RANGE) drawEnemiesAttackRange();
@@ -145,6 +154,7 @@ void SafePathFinder::showGrid() {
 			else if (nodes[i]->getDangerCost() < 0.2) Broodwar->drawCircleMap(x + 4, y + 4, 3, BWAPI::Colors::Orange, false);
 			else if (nodes[i]->getDangerCost() < 0.3) Broodwar->drawCircleMap(x + 4, y + 4, 3, BWAPI::Colors::Red, false);
 			else if (nodes[i]->getDangerCost() < 0.4) Broodwar->drawCircleMap(x + 4, y + 4, 3, BWAPI::Colors::Purple, false);
+			else Broodwar->drawCircleMap(x + 4, y + 4, 3, BWAPI::Colors::Blue, false);
 		}
 	}
 }
@@ -154,10 +164,6 @@ void SafePathFinder::showPath() {
 		Broodwar->drawCircleMap(p.x, p.y, 3, BWAPI::Color(255, 0, 0), true);
 	}
 	Broodwar->drawCircleMap(200, 150, 3, BWAPI::Color(0, 255, 0), true);
-}
-
-void SafePathFinder::showPolygons() {
-	map->getTerrain()->drawPolygons();
 }
 
 void SafePathFinder::drawEnemiesAttackRange() {

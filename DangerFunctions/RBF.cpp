@@ -60,7 +60,7 @@ double RBF::error(double target, double output) {
 	return (target - output);
 }
 
-void RBF::adjust(double input, double output, double target) {
+void RBF::adjust(double output, double target) {
 	double err = error(target, output);
 	for (int k = 0; k < centers; k++){
 		v[k] += alpha * err * hidden[k];
