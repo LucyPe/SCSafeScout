@@ -219,9 +219,9 @@ void Graph::updateUnits() {
 		if ((*u) == unit) continue;
 
 		if ((*u)->isFlying() == unit->isFlying()) {
-			updateWalkability(*u);
-			
+			updateWalkability(*u);			
 		}
+
 		if ((*u)->getPlayer()->isEnemy(Broodwar->self())) {
 			updateDanger(*u); 
 		}

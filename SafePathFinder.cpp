@@ -42,7 +42,6 @@ void SafePathFinder::saveParams(){
 
 void SafePathFinder::setUnit(BWAPI::UnitInterface* u) {
 	unit = u;
-	if (dangerWeight == -1) 
 	map->setUnitPointer(unit);
 }
 
