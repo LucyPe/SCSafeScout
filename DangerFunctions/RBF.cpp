@@ -70,11 +70,6 @@ void RBF::adjust(double output, double target) {
 double RBF::RBFunction(double input, double center) {
 	double x = sqrt((input - center) * (input - center));
 	return triangleRBF(x);
-	//return gaussRBF(x * sigma);
-}
-
-double gaussRBF(double dist) {
-	return std::exp(-(dist * dist));
 }
 
 double RBF::triangleRBF(double dist) {

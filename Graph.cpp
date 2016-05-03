@@ -332,7 +332,6 @@ std::vector<BWAPI::Position> Graph::AStar(BWAPI::Position s, BWAPI::Position e, 
 			double g_score = current->g + current->getCost(i, weight);
 
 			if (g_score < neighbour->g) {
-				//Utility::printToFile(Const::PATH_DEBUG, std::to_string(getNodeCost(current, i, weight)));
 				neighbour->prev = current;
 				neighbour->g = g_score;
 				double f_score = neighbour->g + Utility::distance(neighbour->getPosition(), end);

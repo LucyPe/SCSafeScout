@@ -26,7 +26,7 @@ void ActualDangerFunction::learn(double dist, double = 0) {
 				
 		if (FA->error(target, output) != 0) {
 			FA->adjust(output, target);
-			DangerFunction::visualize(Const::PATH_WRITE + (string) "DF_tmp.dat", false);
+			//DangerFunction::visualize(Const::PATH_WRITE + (string) "DF_tmp.dat", false);
 		}
 
 		hp = actualHp;

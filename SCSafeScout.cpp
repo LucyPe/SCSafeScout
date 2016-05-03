@@ -15,7 +15,6 @@ int position_count = 0;
 bool side = true;
 
 void SCSafeScout::onStart() {
-	//CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
 	BWTA::analyze();
 	BWTA::readMap();
 	
@@ -32,7 +31,6 @@ void SCSafeScout::onStart() {
 			Utility::readFromFile(Const::PATH_TEMP, &position_count);
 			position = Utility::getTrainPosition(&side);
 			pathfinder->LEARNING = true;
-			//pathfinder->LEARNING = false;
 			break;
 		case 1:
 			position = BWAPI::Position(1090, 100);
@@ -47,12 +45,6 @@ void SCSafeScout::onStart() {
 	
 	Broodwar->sendText("%s", "Black sheep wall");
 
-
-
-	// BWAPI returns std::string when retrieving a string, don't forget to add .c_str() when printing!
-	//Broodwar << "The map is " << Broodwar->mapWidth() << " x " << Broodwar->mapHeight()  << std::endl;
-	//Broodwar->enableFlag(Flag::CompleteMapInformation);
-	// Set the command optimization level so that common commands can be grouped and reduce the bot's APM (Actions Per Minute).
 	Broodwar->setCommandOptimizationLevel(2);
 	Broodwar->enableFlag(Flag::UserInput);
 }
@@ -60,17 +52,13 @@ void SCSafeScout::onStart() {
 void SCSafeScout::onEnd(bool isWinner) {
 	if (Const::MODE == 0) {
 		Utility::printToFile(Const::PATH_TEMP, position_count);
-	} /*else if (Const::MODE == 2) {
-		Utility::printToFile(Const::PATH_WRITE + Const::MODEL + (string) "_data.txt", " " + std::to_string(Broodwar->getFrameCount()));
-	}*/
-
+	} 
 	delete(pathfinder);
 	BWTA::cleanMemory();
 }
 
 void SCSafeScout::onFrame() {
 	if (Broodwar->isReplay() || Broodwar->isPaused() || !Broodwar->self()) return;
-	//if (Broodwar->getFrameCount() % Broodwar->getLatencyFrames() != 0) return;
 
 	displayGui();
 	pathfinder->visualizeData();
@@ -108,14 +96,6 @@ void SCSafeScout::onFrame() {
 }
 
 void SCSafeScout::onSendText(std::string text) {
-	// Make sure to use %s and pass the text as a parameter,
-	// otherwise you may run into problems when you use the %(percent) character!
-	/*if (text == "/analyze") {
-		if (analyzed == false) {
-			Broodwar << "Analyzing map... this may take a minute" << std::endl;;
-			CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
-		}
-	}*/
 	if (text == "g") {
 		pathfinder->GRID = !pathfinder->GRID;
 	} else if (text == "s") {

@@ -9,7 +9,7 @@ namespace Const {
 
 	/* Learning params*/
 	const int LEARNING_FRAME_RATE = 5;
-	const int MODEL = 2; // -1 - no danger, 0 - Computed, 1 - Actual, 2 - RL
+	const int MODEL = 0; // -1 - no danger, 0 - Computed, 1 - Actual, 2 - RL
 	const int MODE = 2; // 0 - training, 1 - testing (3ways), 2 - testing (performance)
 
 	const BWAPI::Position TEST_POSITION = BWAPI::Position(1800, 150);

@@ -30,12 +30,9 @@ void RLDangerFunction::learn(double dist, double new_dist) {
 
 		double target = (hp - actualHp) + Const::GAMMA * new_output;
 
-		//if ((hp - actualHp) != 0) Utility::printToFile(Const::PATH_DEBUG, std::to_string(dist) + " " + std::to_string(new_dist));
-
 		if (FA->error(target, last_output) != 0) {
 			FA->adjust(last_output, target);
-			//Utility::printToFile(Const::PATH_DEBUG, std::to_string(dist) + " " + std::to_string(new_dist) + " " + std::to_string(new_output));
-			DangerFunction::visualize(Const::PATH_WRITE + (string) "DF_tmp.dat", false);
+			//DangerFunction::visualize(Const::PATH_WRITE + (string) "DF_tmp.dat", false);
 		}
 
 		hp = actualHp;
